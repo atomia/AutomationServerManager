@@ -87,7 +87,10 @@ class SoapClient(object):
             self.__xml = """<?xml version="1.0" encoding="UTF-8"?> 
 <%(soap_ns)s:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-    xmlns:%(soap_ns)s="%(soap_uri)s">
+    xmlns:%(soap_ns)s="%(soap_uri)s"
+    xmlns:prov="http://atomia.com/atomia/provisioning/" 
+    xmlns:atom="http://schemas.datacontract.org/2004/07/Atomia.Provisioning.Base" 
+    xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
 %(header)s
 <%(soap_ns)s:Body>
     <%(method)s xmlns="%(namespace)s">
@@ -96,7 +99,9 @@ class SoapClient(object):
 </%(soap_ns)s:Envelope>"""
         else:
             self.__xml = """<?xml version="1.0" encoding="UTF-8"?>
-<%(soap_ns)s:Envelope xmlns:%(soap_ns)s="%(soap_uri)s" xmlns:%(ns)s="%(namespace)s">
+<%(soap_ns)s:Envelope xmlns:%(soap_ns)s="%(soap_uri)s" xmlns:%(ns)s="%(namespace)s" xmlns:prov="http://atomia.com/atomia/provisioning/" 
+    xmlns:atom="http://schemas.datacontract.org/2004/07/Atomia.Provisioning.Base" 
+    xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
 %(header)s
 <%(soap_ns)s:Body>
     <%(ns)s:%(method)s>
@@ -132,8 +137,12 @@ class SoapClient(object):
         else:
             # marshall parameters:
             for k,v in parameters: # dict: tag=valor
-                getattr(request,method).marshall(k,v)
-        self.xml_request = request.as_xml()
+                getattr(request,method).marshall('prov:' + k,v)
+        
+        import string
+        self.xml_request = string.replace(request.as_xml(), '<?xml version="1.0" encoding="UTF-8"?>', '')
+        
+        
         self.xml_response = self.send(method, self.xml_request)
         response = SimpleXMLElement(self.xml_response, namespace=self.namespace)
         if self.exceptions and response("Fault", ns=soap_namespaces.values(), error=False):
@@ -158,8 +167,10 @@ class SoapClient(object):
             print "POST %s" % location
             print '\n'.join(["%s: %s" % (k,v) for k,v in headers.items()])
             print u"\n%s" % xml.decode("utf8","ignore")
+       
         response, content = self.http.request(
             location,"POST", body=xml, headers=headers )
+        
         self.response = response
         self.content = content
         if self.trace: 
