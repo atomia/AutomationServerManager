@@ -7,7 +7,7 @@ import time
 from pysimplesoap.client import SoapClient
 from pysimplesoap.simplexml import SimpleXMLElement
 from datetime import datetime
-from atomia_entities import AtomiaAccount, AtomiaService
+from atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCriteria
 from atomia_actions import AtomiaActions
 
 if __name__=="__main__":
@@ -27,15 +27,34 @@ if __name__=="__main__":
     
     manager = AtomiaActions(args.username if args.username is not None else 'Administrator', args.password if args.password is not None else 'Administrator')
 
-#   client = SoapClient(wsdl="file:///C:/Users/Dusan/PythonWorkspace/Test2/src/wsdl0.xml", header=header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+#    import pprint
+#    created_service = manager.create_service('CsDatabase', None, '100002')
+#    
+#    test = AtomiaService()
+#    test.from_simplexml(created_service.itervalues().next())
+
+    service_search_criteria_list = []
+    tmp_ssc = AtomiaServiceSearchCriteria('CsLinuxWebsite', 'CsBase')
+    service_search_criteria_list.append(tmp_ssc)
+#    tmp_ssc = AtomiaServiceSearchCriteria('CsWindowsWebsite', 'CsBase')
+#    service_search_criteria_list.append(tmp_ssc)
+    test = manager.find_services_by_path_with_paging(service_search_criteria_list, '100002')
+
+    for k in test.itervalues().next().children():
+        test2 = AtomiaService()
+        test2.from_simplexml(k)
+#        test2.print_me()
+        
+        service_search_criteria_list = []
+        xml_fr = test2.to_xml_friendly_object('atom:ParentService', 'ParentService')
+        tmp_ssc = AtomiaServiceSearchCriteria('CsMailAccount', '', xml_fr)
+        service_search_criteria_list.append(tmp_ssc)
+        test3 = manager.find_services_by_path_with_paging(service_search_criteria_list, '100002')
+        
+        import pprint
+        pprint.pprint(test3)
     
-#    client = SoapClient(wsdl=args.api_url if args.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=manager.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     
-    import pprint
-    created_service = manager.create_service('CsDatabase', None, '100002')
-    
-    test = AtomiaService()
-    test.from_simplexml(created_service)
     
 #    a = client.CreateService(
 #                         serviceName = 'CsDatabase',
@@ -43,7 +62,8 @@ if __name__=="__main__":
 #                         accountName = '100002'
 #                         )
 #    
-#   
+#    test = AtomiaService()
+#    test.from_simplexml(a)
 #    
 #    for k in a:
 #        for b in a[k].children():

@@ -49,7 +49,8 @@ class AtomiaActions(object):
             self.header = self.header % dict(Created=self.created, Expires=self.expires, Username = self.username, Password = self.password)
         else:
             self.header = soap_header
-
+            
+        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     def add_account(self, account):
         
         client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
@@ -61,4 +62,18 @@ class AtomiaActions(object):
                                     serviceName = service_name,
                                     parentService = parent_service,
                                     accountName = account_number)
+        
+    def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number = 0, page_size = 100):
+
+        return self.client.FindServicesByPathWithPaging(searchCriteriaList = search_criteria_list,
+                                                 account = account_number,
+                                                 sortByPropName = sort_by_prop_name,
+                                                 sortAsc = sort_asc,
+                                                 pageNumber = page_number,
+                                                 pageSize = page_size)
+        
+#    def get_action_result_as_simple_xml(self, action_result):
+#        for k in action_result:
+#            return k
+        
         

@@ -216,14 +216,33 @@ class SoapClient(object):
             if isinstance(od, dict):
                 ret = OrderedDict()
                 for k in od.keys():
-                    v = d.get(k)
-                    if v:
-                        if isinstance(v, dict):
-                            v = sort_dict(od[k], v)
-                        elif isinstance(v, list):
-                            v = [sort_dict(od[k][0], v1) 
-                                    for v1 in v]
-                        ret[str(k)] = v 
+                    if od[k] is not None:
+                        v = d.get(k)
+                        if v:
+                            if isinstance(v, dict):
+                                v = sort_dict(od[k], v)
+                            elif isinstance(v, list):
+                                    v = [sort_dict(od[k][0], v1) 
+                                        for v1 in v]
+                            ret[str(k)] = v
+                    else:
+                        if d.get(k) is not None:
+                            tst = []
+                            for m in d.get(k):
+                                tmp_dict = {}
+                                for p in m.__dict__.iteritems():
+                                    if (isinstance(p[1], dict)):
+                                        if (isinstance(p[1]['value'], dict)):
+                                            tmp_inner_dict = {}
+                                            for cnt in p[1]['value']:
+                                                if isinstance(p[1]['value'][cnt], dict):
+                                                    tmp_inner_dict[p[1]['value'][cnt]['xml_tag_with_namespace']] = p[1]['value'][cnt]['value'] 
+                                            tmp_dict[p[1]['xml_tag_with_namespace']] = tmp_inner_dict
+                                                
+                                        else:
+                                            tmp_dict[p[1]['xml_tag_with_namespace']] = p[1]['value']
+                                tst.append({ getattr(m, 'xml_tag_with_namespace') : tmp_dict })
+                            ret[str(k)] = tst
                 return ret
             else:
                 return d
