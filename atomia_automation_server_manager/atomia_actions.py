@@ -66,14 +66,14 @@ class AtomiaActions(object):
     def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number ='0', page_size = '100'):
 
         return self.client.FindServicesByPathWithPaging(searchCriteriaList = search_criteria_list,
+                                                 properties = search_properties,
                                                  account = account_number,
                                                  sortByPropName = sort_by_prop_name,
                                                  sortAsc = sort_asc,
                                                  pageNumber = page_number,
                                                  pageSize = page_size)
         
-#    def get_action_result_as_simple_xml(self, action_result):
-#        for k in action_result:
-#            return k
-        
+    def get_service_by_id(self, account_number, service_id):
+        return self.client.GetServiceById(accountId = account_number,
+                                          serviceID = service_id)
         

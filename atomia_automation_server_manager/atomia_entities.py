@@ -142,13 +142,6 @@ class AtomiaService(object):
     def print_me(self):
         import json
         print json.dumps(self, default=encode_me, indent=4)
-#        for k, v in self.__dict__.iteritems():
-#            if k == 'properties' and self.properties is not None and len(self.properties) > 0:
-#                print k
-#                for item in v:
-#                    item.print_me()
-#            else:
-#                print k, v
     
     def initialize_properties(self, k):
         for b in k.children():
@@ -224,6 +217,40 @@ class AtomiaServiceSearchCriteria(object):
                                             }
         return xml_friendly
 
+
+class AtomiaServiceSearchCriteriaProperty(object):
+    def __init__(self, key, value):
+        
+        self.key = key
+        self.value = value
+        return
+    
+    def __iter__(self):
+        for item in self.__dict__:
+            yield self.__dict__[item]
+            
+    def to_xml_friendly_object(self, xml_tag_with_namespace, xml_tag):
+        
+        xml_friendly = {}
+        
+        xml_friendly['xml_tag_with_namespace'] = xml_tag_with_namespace
+        
+        xml_friendly['xml_tag'] = xml_tag
+        
+        if self.key is not None:
+            xml_friendly['key'] = { 'xml_tag_with_namespace' : 'arr:Key', 
+                                              'xml_tag' : 'Key',
+                                              'value' : self.key,
+                                              'order' : 1
+                                            }
+        if self.value is not None:
+            xml_friendly['value'] = { 'xml_tag_with_namespace' : 'arr:Value', 
+                                              'xml_tag' : 'Value',
+                                              'value' : self.value,
+                                              'order' : 2
+                                              }
+         
+        return xml_friendly
 
 class AtomiaServiceProperty(object):
     def __init__(self, id = None, is_key = None, name = None, property_type = None, prop_string_value = None):
