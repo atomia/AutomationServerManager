@@ -35,7 +35,7 @@ if __name__=="__main__":
 
     service_search_criteria_list = []
     tmp_ssc = AtomiaServiceSearchCriteria('CsLinuxWebsite', 'CsBase')
-    service_search_criteria_list.append(tmp_ssc)
+    service_search_criteria_list.append(tmp_ssc.to_xml_friendly_object('atom:ServiceSearchCriteria', 'ServiceSearchCriteria'))
 #    tmp_ssc = AtomiaServiceSearchCriteria('CsWindowsWebsite', 'CsBase')
 #    service_search_criteria_list.append(tmp_ssc)
     test = manager.find_services_by_path_with_paging(service_search_criteria_list, '100002')
@@ -43,16 +43,18 @@ if __name__=="__main__":
     for k in test.itervalues().next().children():
         test2 = AtomiaService()
         test2.from_simplexml(k)
-#        test2.print_me()
+        test2.print_me()
         
         service_search_criteria_list = []
         xml_fr = test2.to_xml_friendly_object('atom:ParentService', 'ParentService')
-        tmp_ssc = AtomiaServiceSearchCriteria('CsMailAccount', '', xml_fr)
-        service_search_criteria_list.append(tmp_ssc)
+        tmp_ssc = AtomiaServiceSearchCriteria('MailAccount', 'CsMailSupport/MailDomain', xml_fr)
+        service_search_criteria_list.append(tmp_ssc.to_xml_friendly_object('atom:ServiceSearchCriteria', 'ServiceSearchCriteria'))
         test3 = manager.find_services_by_path_with_paging(service_search_criteria_list, '100002')
         
-        import pprint
-        pprint.pprint(test3)
+        for j in test3.itervalues().next().children():
+            test4 = AtomiaService()
+            test4.from_simplexml(j)
+            test4.print_me()
     
     
     

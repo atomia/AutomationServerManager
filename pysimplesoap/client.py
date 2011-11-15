@@ -168,6 +168,7 @@ class SoapClient(object):
             print '\n'.join(["%s: %s" % (k,v) for k,v in headers.items()])
             print u"\n%s" % xml.decode("utf8","ignore")
        
+#        print xml
         response, content = self.http.request(
             location,"POST", body=xml, headers=headers )
         
@@ -211,6 +212,10 @@ class SoapClient(object):
         output = operation['output']
         if 'action' in operation:
             self.action = operation['action']
+            
+        
+            
+            
         # sort parameters (same order as xsd:sequence)
         def sort_dict(od, d):
             if isinstance(od, dict):
@@ -230,18 +235,29 @@ class SoapClient(object):
                             tst = []
                             for m in d.get(k):
                                 tmp_dict = {}
-                                for p in m.__dict__.iteritems():
+                                dict_to_return = OrderedDict()
+                                for p in m.items():
                                     if (isinstance(p[1], dict)):
                                         if (isinstance(p[1]['value'], dict)):
                                             tmp_inner_dict = {}
+                                            tmp_sorted_inner_dict = OrderedDict()
                                             for cnt in p[1]['value']:
                                                 if isinstance(p[1]['value'][cnt], dict):
-                                                    tmp_inner_dict[p[1]['value'][cnt]['xml_tag_with_namespace']] = p[1]['value'][cnt]['value'] 
-                                            tmp_dict[p[1]['xml_tag_with_namespace']] = tmp_inner_dict
+                                                    tmp_inner_dict[p[1]['value'][cnt]['xml_tag_with_namespace']] = { p[1]['value'][cnt]['order'] : p[1]['value'][cnt]['value'] } 
+                                            
+                                            for cnt, cntv in sorted(tmp_inner_dict.items(), key=lambda v: v[1].keys()[0]):
+                                                tmp_sorted_inner_dict[cnt] = cntv.values()[0]
+                                                     
+                                            tmp_dict[p[1]['xml_tag_with_namespace']] = { p[1]['order'] : tmp_sorted_inner_dict }
                                                 
                                         else:
-                                            tmp_dict[p[1]['xml_tag_with_namespace']] = p[1]['value']
-                                tst.append({ getattr(m, 'xml_tag_with_namespace') : tmp_dict })
+                                            tmp_dict[p[1]['xml_tag_with_namespace']] = { p[1]['order'] : p[1]['value'] }
+                                
+                                for cnt, cntv in sorted(tmp_dict.items(), key=lambda v: v[1].keys()[0]):
+                                    dict_to_return[cnt] = cntv.values()[0]
+                                
+                                
+                                tst.append({ m['xml_tag_with_namespace'] : dict_to_return })
                             ret[str(k)] = tst
                 return ret
             else:

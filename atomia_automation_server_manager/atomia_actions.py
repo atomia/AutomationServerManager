@@ -63,7 +63,7 @@ class AtomiaActions(object):
                                     parentService = parent_service,
                                     accountName = account_number)
         
-    def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number = 0, page_size = 100):
+    def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number ='0', page_size = '100'):
 
         return self.client.FindServicesByPathWithPaging(searchCriteriaList = search_criteria_list,
                                                  account = account_number,
