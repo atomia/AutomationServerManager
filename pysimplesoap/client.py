@@ -256,8 +256,10 @@ class SoapClient(object):
                                 for cnt, cntv in sorted(tmp_dict.items(), key=lambda v: v[1].keys()[0]):
                                     dict_to_return[cnt] = cntv.values()[0]
                                 
-                                
-                                tst.append({ m['xml_tag_with_namespace'] : dict_to_return })
+                                if m.has_key('xml_tag_with_namespace'):
+                                    tst.append({ m['xml_tag_with_namespace'] : dict_to_return })
+                                else:
+                                    tst.append(dict_to_return)
                             ret[str(k)] = tst
                 return ret
             else:

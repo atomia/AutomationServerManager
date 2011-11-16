@@ -19,11 +19,6 @@ class AtomiaAccount(object):
                 self.account['%sProvisioningDescription' % namespace] = provisioning_description
          
 
-class AtomiaServiceProperty(object):
-    def __init__(self, id = None, is_key = None, name = None, property_type = None, prop_string_value = None):
-        return
-
-
 class AtomiaService(object):
     def __init__(self, account_owner_id = None, current_request_id = None, status = None, disabled = None, 
               friendly_name = None, logical_id = None, name = None, physical_id = None, properties = None, provisioning_description = None, parent = None):
@@ -40,13 +35,15 @@ class AtomiaService(object):
         self.parent = parent
         return
     
-    def to_xml_friendly_object(self, xml_tag_with_namespace, xml_tag):
+    def to_xml_friendly_object(self, xml_tag_with_namespace = None, xml_tag = None):
         
         xml_friendly = {}
         
-        xml_friendly['xml_tag_with_namespace'] = xml_tag_with_namespace
+        if xml_tag_with_namespace is not None:
+            xml_friendly['xml_tag_with_namespace'] = xml_tag_with_namespace
         
-        xml_friendly['xml_tag'] = xml_tag
+        if xml_tag is not None:
+            xml_friendly['xml_tag'] = xml_tag
         
         if self.logical_id is not None:
             xml_friendly['logical_id'] = { 'xml_tag_with_namespace' : 'atom:logicalId', 
@@ -103,6 +100,13 @@ class AtomiaService(object):
                                         'value' : self.name,
                                         'order' : 7
                                     }
+            
+        xml_friendly['properties'] = { 'xml_tag_with_namespace' : 'atom:properties', 
+                                    'xml_tag' : 'properties',
+                                    'value' : '',
+                                    'order' : 9
+                                }
+
 
         if self.provisioning_description is not None:
             xml_friendly['provisioning_description'] = { 'xml_tag_with_namespace' : 'atom:provisioningDescription', 
@@ -139,9 +143,14 @@ class AtomiaService(object):
             else:  
                 self.from_simplexml(simple_xml_element.children())
     
-    def print_me(self):
+    def print_me(self, display_parent = True, display_parent_id = False):
         import json
-        print json.dumps(self, default=encode_me, indent=4)
+        if display_parent:
+            print json.dumps(self, default=encode_me, indent=4)
+        elif display_parent_id:
+            print json.dumps(self, default=encode_me_with_parent_id, indent=4)
+        else:
+            print json.dumps(self, default=encode_me_without_parent, indent=4)
     
     def initialize_properties(self, k):
         for b in k.children():
@@ -331,3 +340,18 @@ class AtomiaServiceProperty(object):
 
 def encode_me(obj):
     return obj.__dict__
+              
+def encode_me_without_parent(obj):
+    from copy import deepcopy
+    tmp_dict = deepcopy(obj.__dict__)
+    if tmp_dict.has_key('parent'):
+        del tmp_dict['parent']
+    return tmp_dict
+
+def encode_me_with_parent_id(obj):
+    from copy import deepcopy
+    tmp_dict = deepcopy(obj.__dict__)
+    if tmp_dict.has_key('parent'):
+        tmp_dict['parent_id'] = tmp_dict['parent'].logical_id
+        del tmp_dict['parent']
+    return tmp_dict

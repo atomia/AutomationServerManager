@@ -51,14 +51,14 @@ class AtomiaActions(object):
             self.header = soap_header
             
         self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+    
     def add_account(self, account):
         
-        client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
-        return client.AddAccount(account = account)
+        return self.client.AddAccount(account = account)
         
     def create_service(self, service_name, parent_service, account_number):
-        client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
-        return client.CreateService(
+
+        return self.client.CreateService(
                                     serviceName = service_name,
                                     parentService = parent_service,
                                     accountName = account_number)
@@ -77,3 +77,10 @@ class AtomiaActions(object):
         return self.client.GetServiceById(accountId = account_number,
                                           serviceID = service_id)
         
+    def list_existing_service(self, parent_service, account_number, get_logical_children = 'true', sort_asc = 'true', page_number ='0', page_size = '100'):
+        return self.client.ListExistingServices(parentService = parent_service,
+                                                getLogicalChildren = get_logical_children,
+                                                accountId = account_number,
+                                                sortAsc = sort_asc,
+                                                pageNumber = page_number,
+                                                pageSize = page_size)
