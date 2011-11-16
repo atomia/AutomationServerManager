@@ -143,6 +143,25 @@ class AtomiaService(object):
             else:  
                 self.from_simplexml(simple_xml_element.children())
     
+    def to_print_friendly(self, display_parent = True, display_parent_id = False):
+        if display_parent:
+            return self
+        elif display_parent_id:
+            from copy import deepcopy
+            copied = deepcopy(self)
+            tmp_dict = copied.__dict__
+            if tmp_dict.has_key('parent'):
+                tmp_dict['parent_id'] = tmp_dict['parent'].logical_id
+                del tmp_dict['parent']
+            return copied
+        else:
+            from copy import deepcopy
+            copied = deepcopy(self)
+            tmp_dict = copied.__dict__
+            if tmp_dict.has_key('parent'):
+                del tmp_dict['parent']
+            return copied
+            
     def print_me(self, display_parent = True, display_parent_id = False):
         import json
         if display_parent:

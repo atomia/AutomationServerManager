@@ -50,7 +50,7 @@ class AtomiaActions(object):
         else:
             self.header = soap_header
             
-        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.testgui.atomiademo.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.int.atomia.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     
     def add_account(self, account):
         
