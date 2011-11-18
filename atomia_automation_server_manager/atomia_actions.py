@@ -11,7 +11,7 @@ import atomia_entities
 
 class AtomiaActions(object):
     
-    def __init__(self, username, password, api_url = None, token_created = None, token_expires = None, soap_header = None):
+    def __init__(self, username, password, api_url = None, token_created = None, token_expires = None, soap_header = None, body_xmlns = None):
 
         if token_created is None:
             self.created = datetime.fromtimestamp(time.mktime(time.gmtime())).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -50,7 +50,12 @@ class AtomiaActions(object):
         else:
             self.header = soap_header
             
-        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.int.atomia.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+        if body_xmlns is None:
+            self.body_xmlns = 'xmlns:prov="http://atomia.com/atomia/provisioning/" xmlns:atom="http://schemas.datacontract.org/2004/07/Atomia.Provisioning.Base" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays"'
+        else:
+            self.body_xmlns = body_xmlns
+            
+        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.int.atomia.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     
     def add_account(self, account):
         

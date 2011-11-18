@@ -48,7 +48,7 @@ class SoapClient(object):
     "Simple SOAP Client (símil PHP)"
     def __init__(self, location = None, action = None, namespace = None,
                  cert = None, trace = False, exceptions = True, proxy = None, ns=False, 
-                 soap_ns=None, wsdl = None, header = None, cache = False):
+                 soap_ns=None, wsdl = None, header = None, body_xmlns = None, cache = False):
         
         
         self.certssl = cert             
@@ -56,6 +56,7 @@ class SoapClient(object):
         self.location = location        # server location (url)
         self.action = action            # SOAP base action
         self.header = header or ''      # SOAP header (if any)
+        self.body_xmlns = body_xmlns or ''          # Additional xml schemas (if any)
         self.trace = trace              # show debug messages
         self.exceptions = exceptions    # lanzar execpiones? (Soap Faults)
         self.xml_request = self.xml_response = ''
@@ -87,23 +88,18 @@ class SoapClient(object):
             self.__xml = """<?xml version="1.0" encoding="UTF-8"?> 
 <%(soap_ns)s:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-    xmlns:%(soap_ns)s="%(soap_uri)s"
-    xmlns:prov="http://atomia.com/atomia/provisioning/" 
-    xmlns:atom="http://schemas.datacontract.org/2004/07/Atomia.Provisioning.Base" 
-    xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+    xmlns:%(soap_ns)s="%(soap_uri)s">
 %(header)s
-<%(soap_ns)s:Body>
+<%(soap_ns)s:Body %(body_xmlns)s>
     <%(method)s xmlns="%(namespace)s">
     </%(method)s>
 </%(soap_ns)s:Body>
 </%(soap_ns)s:Envelope>"""
         else:
             self.__xml = """<?xml version="1.0" encoding="UTF-8"?>
-<%(soap_ns)s:Envelope xmlns:%(soap_ns)s="%(soap_uri)s" xmlns:%(ns)s="%(namespace)s" xmlns:prov="http://atomia.com/atomia/provisioning/" 
-    xmlns:atom="http://schemas.datacontract.org/2004/07/Atomia.Provisioning.Base" 
-    xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+<%(soap_ns)s:Envelope xmlns:%(soap_ns)s="%(soap_uri)s" xmlns:%(ns)s="%(namespace)s">
 %(header)s
-<%(soap_ns)s:Body>
+<%(soap_ns)s:Body %(body_xmlns)s>
     <%(ns)s:%(method)s>
     </%(ns)s:%(method)s>
 </%(soap_ns)s:Body>
@@ -122,8 +118,8 @@ class SoapClient(object):
         # Basic SOAP request:
 
         xml = self.__xml % dict(method=method, namespace=self.namespace, ns=self.__ns, header = self.header,
-                                soap_ns=self.__soap_ns, soap_uri=soap_namespaces[self.__soap_ns])
-                
+                                soap_ns=self.__soap_ns, soap_uri=soap_namespaces[self.__soap_ns], body_xmlns = self.body_xmlns)
+        
         request = SimpleXMLElement(xml,namespace=self.__ns and self.namespace, prefix=self.__ns)
         # serialize parameters
         if kwargs:
@@ -137,11 +133,9 @@ class SoapClient(object):
         else:
             # marshall parameters:
             for k,v in parameters: # dict: tag=valor
-                getattr(request,method).marshall('prov:' + k,v)
+                getattr(request,method).marshall(k,v)
         
-        import string
-        self.xml_request = string.replace(request.as_xml(), '<?xml version="1.0" encoding="UTF-8"?>', '')
-        
+        self.xml_request = request.as_xml()
         
         self.xml_response = self.send(method, self.xml_request)
         response = SimpleXMLElement(self.xml_response, namespace=self.namespace)
@@ -174,6 +168,7 @@ class SoapClient(object):
         
         self.response = response
         self.content = content
+        
         if self.trace: 
             print 
             print '\n'.join(["%s: %s" % (k,v) for k,v in response.items()])
