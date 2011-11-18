@@ -100,12 +100,24 @@ class AtomiaService(object):
                                         'value' : self.name,
                                         'order' : 7
                                     }
+        if self.properties is not None and len(self.properties) > 0:
             
-        xml_friendly['properties'] = { 'xml_tag_with_namespace' : 'atom:properties', 
-                                    'xml_tag' : 'properties',
-                                    'value' : '',
-                                    'order' : 9
-                                }
+            properties_list = []
+            for proper in self.properties:
+                properties_list.append(AtomiaServiceProperty(id = None, is_key = None, name = proper.name, property_type = None, prop_string_value = proper.prop_string_value).to_xml_friendly_object("atom:ProvisioningServiceProperty", "ProvisioningServiceProperty"))
+            
+            xml_friendly['properties'] = { 'xml_tag_with_namespace' : 'atom:properties', 
+                                        'xml_tag' : 'properties',
+                                        'value' : properties_list,
+                                        'order' : 9
+                                    }
+        
+        else: 
+            xml_friendly['properties'] = { 'xml_tag_with_namespace' : 'atom:properties', 
+                                        'xml_tag' : 'properties',
+                                        'value' : '',
+                                        'order' : 9
+                                    }
 
 
         if self.provisioning_description is not None:
@@ -194,10 +206,11 @@ class AtomiaService(object):
                 self.provisioning_description = str(b)
             elif local_name == 'properties':
                 self.properties = []
-                for j in b.children():
-                    tmp_property = AtomiaServiceProperty()
-                    tmp_property.from_simplexml(j)
-                    self.properties.append(tmp_property)
+                if b.children() is not None and len(b.children()) > 0:
+                    for j in b.children():
+                        tmp_property = AtomiaServiceProperty()
+                        tmp_property.from_simplexml(j)
+                        self.properties.append(tmp_property)
             elif local_name == 'Parent':
                 tmp_property = AtomiaService()
                 tmp_property.from_simplexml(b)
@@ -335,25 +348,40 @@ class AtomiaServiceProperty(object):
         
         xml_friendly['xml_tag'] = xml_tag
         
-        if self.service_name is not None:
-            xml_friendly['service_name'] = { 'xml_tag_with_namespace' : 'atom:ServiceName', 
-                                              'xml_tag' : 'ServiceName',
-                                              'value' : self.service_name,
+        if self.id is not None:
+            xml_friendly['id'] = { 'xml_tag_with_namespace' : 'atom:ID', 
+                                              'xml_tag' : 'ID',
+                                              'value' : self.id,
                                               'order' : 1
                                               }
          
-        if self.service_path is not None:
-            xml_friendly['service_path'] = { 'xml_tag_with_namespace' : 'atom:ServicePath', 
-                                              'xml_tag' : 'ServicePath',
-                                              'value' : self.service_path,
+        if self.is_key is not None:
+            xml_friendly['is_key'] = { 'xml_tag_with_namespace' : 'atom:IsKey', 
+                                              'xml_tag' : 'IsKey',
+                                              'value' : self.is_key,
                                               'order' : 2
                                             }
             
-        if self.parent_service is not None:
-            xml_friendly['parent_service'] = { 'xml_tag_with_namespace' : 'atom:ParentService', 
-                                              'xml_tag' : 'ParentService',
-                                              'value' : self.parent_service,
-                                              'order' : 0
+        if self.name is not None:
+            xml_friendly['name'] = { 'xml_tag_with_namespace' : 'atom:Name', 
+                                              'xml_tag' : 'Name',
+                                              'value' : self.name,
+                                              'order' : 3
+                                            }
+            
+        if self.property_type is not None:
+            xml_friendly['property_type'] = { 'xml_tag_with_namespace' : 'atom:PropertyType', 
+                                              'xml_tag' : 'PropertyType',
+                                              'value' : self.property_type,
+                                              'order' : 4
+                                            }
+            
+            
+        if self.prop_string_value is not None:
+            xml_friendly['prop_string_value'] = { 'xml_tag_with_namespace' : 'atom:propStringValue', 
+                                              'xml_tag' : 'propStringValue',
+                                              'value' : self.prop_string_value,
+                                              'order' : 5
                                             }
         return xml_friendly
 

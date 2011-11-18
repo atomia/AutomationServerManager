@@ -63,6 +63,28 @@ class AtomiaActions(object):
                                     parentService = parent_service,
                                     accountName = account_number)
         
+    def add_service(self, service, parent_service, account_number, resource_request_descriptions = None):
+
+        return self.client.AddService(
+                                    service = service,
+                                    parentService = parent_service,
+                                    accountName = account_number,
+                                    resourceRequestDescriptions = resource_request_descriptions)
+        
+    def delete_service(self, service, account_number):
+
+        return self.client.DeleteService(
+                                    service = service,
+                                    accountName = account_number)
+        
+        
+    def modify_service (self, service, account_number):
+
+        return self.client.ModifyService(
+                                    service = service,
+                                    accountName = account_number)
+
+        
     def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number ='0', page_size = '100'):
 
         return self.client.FindServicesByPathWithPaging(searchCriteriaList = search_criteria_list,

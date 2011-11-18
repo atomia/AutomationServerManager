@@ -249,7 +249,22 @@ class SoapClient(object):
                                                 tmp_sorted_inner_dict[cnt] = cntv.values()[0]
                                                      
                                             tmp_dict[p[1]['xml_tag_with_namespace']] = { p[1]['order'] : tmp_sorted_inner_dict }
-                                                
+                                        elif isinstance(p[1]['value'], list):
+                                            tmp_list = []
+                                            for v1 in p[1]['value']:
+                                                if (isinstance(v1, dict)):
+                                                    tmp_inner_dict = {}
+                                                    tmp_sorted_inner_dict = OrderedDict()
+                                                    for cnt in v1:
+                                                        if isinstance(v1[cnt], dict):
+                                                            tmp_inner_dict[v1[cnt]['xml_tag_with_namespace']] = { v1[cnt]['order'] : v1[cnt]['value'] } 
+                                                    
+                                                    for cnt, cntv in sorted(tmp_inner_dict.items(), key=lambda v: v[1].keys()[0]):
+                                                        tmp_sorted_inner_dict[cnt] = cntv.values()[0]
+                                                        
+                                                    tmp_list.append({ p[1]['value'][0]['xml_tag_with_namespace'] : tmp_sorted_inner_dict })
+                                                             
+                                            tmp_dict[p[1]['xml_tag_with_namespace']] = { p[1]['order'] : tmp_list }       
                                         else:
                                             tmp_dict[p[1]['xml_tag_with_namespace']] = { p[1]['order'] : p[1]['value'] }
                                 
