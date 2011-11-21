@@ -3,6 +3,7 @@ from atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCri
 from atomia_actions import AtomiaActions
 import atomia
 import pytest
+import urllib2
 
 class ArgumentsMock(object):
     def __init__(self, username = None, password = None, api_url = None, entity = None, action = None, account = None, service_id = None, service_locator = None, service = None, find_options = None):
@@ -142,7 +143,176 @@ def test_find_no_parent_root_service():
     mock = ArgumentsMock(entity="service", action = "find", account="101321", find_options = "{ \"service_name\" : \"CsBase\" }" )
     assert isinstance(atomia.main(mock), list) and len(atomia.main(mock)) > 0  
  
+# add service
 
+def test_add_no_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321")
+    with pytest.raises(atomia.InputError):
+        atomia.main(mock)
+
+def test_add_missing_parent_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+    with pytest.raises(urllib2.HTTPError):
+        atomia.main(mock)
+
+def test_add_no_parent_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result = atomia.main(mock)
+    assert isinstance(result, AtomiaService)
+    mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result.logical_id)
+    atomia.main(mock)
+    
+def test_add_with_parent_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        result = atomia.main(mock)
+        assert isinstance(result, AtomiaService)
+        mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+        atomia.main(mock)
+    else:
+        assert False    
+        
+def test_add_with_parent_service_and_invalid_name():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase \", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        with pytest.raises(urllib2.HTTPError):
+            atomia.main(mock)
+        mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+        atomia.main(mock)
+    else:
+        assert False
+        
+def test_add_with_parent_service_and_invalid_property():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseMame\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        with pytest.raises(urllib2.HTTPError):
+            atomia.main(mock)
+        mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+        atomia.main(mock)
+    else:
+        assert False
     
 
+def test_add_with_parent_service_and_missing_properties():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\" }")
+        with pytest.raises(urllib2.HTTPError):
+            atomia.main(mock)
+        mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+        atomia.main(mock)
+    else:
+        assert False
+
+# delete service
+
+def test_delete_no_service():
+    mock = ArgumentsMock(entity="service", action = "delete", account="101321")
+    with pytest.raises(Exception):
+        atomia.main(mock)
+
+def test_delete_invalid_service_id():
+    mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = "00000000-0000-0000-0000-000000000000")
+    with pytest.raises(Exception):
+        atomia.main(mock)
+
+def test_delete_non_existing_service_locator_path():
+    mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_locator="[{\"CsBase\" : \"d83805a8-c4a3-4e17-96af-4c9f0c1679d2\"}, {\"CsMySqlDatabase\" : { \"DatabaseName\" : \"python44.org\"}}]")
+    with pytest.raises(Exception):
+        atomia.main(mock)
+        
+def test_delete_service_id():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    add_result = atomia.main(mock)
+    mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = add_result.logical_id)
+    assert atomia.main(mock)
     
+def test_delete_service_locator():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    add_result_parent = atomia.main(mock)
+    if (isinstance(add_result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = add_result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        add_result = atomia.main(mock)
+        if (isinstance(add_result, AtomiaService)):
+            delete_mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_locator="[{\"CsDatabase\" : \"" + add_result_parent.logical_id + "\"}, { \"CsMySqlDatabase\" : { \"DatabaseName\" : \"testpy45\"} } ]")
+            assert atomia.main(delete_mock)
+
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = add_result_parent.logical_id)
+            atomia.main(mock)
+        else:
+            assert False
+    else:
+        assert False
+
+# modify service
+
+def test_modify_no_service():
+    mock = ArgumentsMock(entity="service", action = "modify", account="101321")
+    with pytest.raises(atomia.InputError):
+        atomia.main(mock)
+
+def test_modify_missing_parent_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"Collation\" : \"utf8_unicode_ci\"}}")
+    with pytest.raises(urllib2.HTTPError):
+        atomia.main(mock)
+
+def test_modify_with_parent_service():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        add_result = atomia.main(mock)
+        if isinstance(add_result, AtomiaService):
+            modify_result = ArgumentsMock(entity="service", action = "modify", account="101321", service_id = add_result.logical_id, service = "{ \"service_properties\" : { \"Collation\" : \"utf8_unicode_ci\"}}")
+            assert isinstance(atomia.main(modify_result), AtomiaService)
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+            atomia.main(mock)
+        else:
+            assert False
+    else:
+        assert False    
+        
+def test_modify_with_parent_service_and_invalid_property():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        add_result = atomia.main(mock)
+        if isinstance(add_result, AtomiaService):
+            modify_result = ArgumentsMock(entity="service", action = "modify", account="101321", service_id = add_result.logical_id, service = "{ \"service_properties\" : { \"Colation\" : \"utf8_unicode_ci\"}}")
+            with pytest.raises(Exception):
+                atomia.main(modify_result)
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+            atomia.main(mock)
+        else:
+            assert False
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+            atomia.main(mock)
+    else:
+        assert False    
+
+def test_modify_with_parent_service_and_missing_properties():
+    mock = ArgumentsMock(entity="service", action = "add", account="101321", service = "{ \"service_name\" : \"CsDatabase\" }")
+    result_parent = atomia.main(mock)
+    if (isinstance(result_parent, AtomiaService)):
+        mock = ArgumentsMock(entity="service", action = "add", account="101321", service_id = result_parent.logical_id, service = "{ \"service_name\" : \"CsMySqlDatabase\", \"service_properties\" : { \"DatabaseName\" : \"testpy45\", \"CharacterSet\" : \"utf8\", \"Collation\" : \"utf8_general_ci\"}}")
+        add_result = atomia.main(mock)
+        if isinstance(add_result, AtomiaService):
+            modify_result = ArgumentsMock(entity="service", action = "modify", account="101321", service_id = add_result.logical_id)
+            with pytest.raises(Exception):
+                atomia.main(modify_result)
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+            atomia.main(mock)
+        else:
+            assert False
+            mock = ArgumentsMock(entity="service", action = "delete", account="101321", service_id = result_parent.logical_id)
+            atomia.main(mock)
+    else:
+        assert False      

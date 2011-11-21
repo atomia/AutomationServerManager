@@ -186,6 +186,7 @@ def service_add(args, manager):
                     added_service = AtomiaService()
                     added_service.from_simplexml(k)
                     added_service.print_me(False, True)
+                    return added_service
             else:
                 raise Exception("Could not add service: " + created_service.name)
             
@@ -197,6 +198,7 @@ def service_delete(args, manager):
     if service_to_delete is not None:
         manager.delete_service([service_to_delete.to_xml_friendly_object()], args.account)
         print "Deleted service " + service_to_delete.logical_id + " successfully."
+        return True
     else:
         raise Exception("No service found!")
     
@@ -222,10 +224,16 @@ def service_modify(args, manager):
     if current_service is None:
         raise Exception("Could not find service to be modified.")
     
+    
+    
     if current_service.properties is not None and len(current_service.properties) > 0:
-        for list_count in current_service.properties:
-            if (service_properties.has_key(list_count.name)):
-                list_count.prop_string_value = service_properties[list_count.name]
+        non_existing_props_list = list(set(service_properties.keys())-set(map(lambda x: x.name, current_service.properties)))
+        if len(non_existing_props_list) > 0:
+            raise Exception("Non-existing property: " + non_existing_props_list[0])
+        else:
+            for list_count in current_service.properties:
+                if (service_properties.has_key(list_count.name)):
+                    list_count.prop_string_value = service_properties[list_count.name]
                 
         modify_service_result = manager.modify_service([current_service.to_xml_friendly_object()], args.account)
         
@@ -234,6 +242,7 @@ def service_modify(args, manager):
                 modified_service = AtomiaService()
                 modified_service.from_simplexml(k)
                 modified_service.print_me(False, True)
+                return modified_service
         else:
             raise Exception("Could not modify service: " + current_service.name)
                     
