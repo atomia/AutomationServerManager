@@ -1,0 +1,415 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- This document was created with Syntext Serna Free. -->
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "docbookV4.5/docbookx.dtd" []>
+<book>
+  <title>Atomia Automation Server Manager manual</title>
+  <preface>
+    <title>Introduction</title>
+    <para> Atomia Automation Server Manager is python-based command line application for managing Automation server accounts, packages and services. It contains most of the features of current Automation Server Client and allows making scripts that would do some batch operations in Automation Server (like adding/modifying/deleting bunch of services, installing the whole environment, once the Resource manager is ready, etc.) In future version(s) the Atomia Automation Server Manager will get its GUI part as well, which would be based on this command-line application.</para>
+  </preface>
+  <chapter>
+    <title>Usage</title>
+    <section>
+      <title>Overview</title>
+      <para>The current version of Atomia Automation Server Manager supports <emphasis role="bold">account</emphasis> entity only. The support for <emphasis role="bold">package</emphasis> and <emphasis role="bold">account</emphasis> entities will come in one of the next versions.</para>
+      <para>The Atomia Automation Server Manager is executed by running <emphasis role="italic">atomia.py</emphasis> python script. This script has <emphasis role="bold">-h</emphasis> switch, which prints out the available arguments:<programlisting>usage: atomia [-h] [--username USERNAME] [--password PASSWORD]
+              [--api_url API_URL] [--service_id SERVICE_ID]
+              [--service_locator SERVICE_LOCATOR] [--service SERVICE]
+              [--find_options FIND_OPTIONS]
+              entity action account
+
+Atomia Automation Server Manager
+
+positional arguments:
+  entity                account|package|service
+  action                show|list|find|add|delete|modify
+  account               The account number in Automation Server
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --username USERNAME   The API user&apos;s username
+  --password PASSWORD   The API user&apos;s password
+  --api_url API_URL     The URL of the Automation Server API service
+  --service_id SERVICE_ID
+                        The string with logical id of the parent service
+                        (add|find service actions) or the given service
+                        (show|list|modify|delete service actions)
+  --service_locator SERVICE_LOCATOR
+                        The JSON representation of the path to the parent
+                        service (add|find service actions) or the given
+                        service (show|list|modify|delete service actions)
+  --service SERVICE     Required argument when using add/modify service; Json
+                        representation of the service to be added/modified
+                        with possible keys: service_name(required when adding)
+                        and service_properties(required when adding or
+                        modifying
+  --find_options FIND_OPTIONS
+                        Required argument when using find service; Json object
+                        with possible keys: service_name, relative_path,
+                        service_properties, result_page, result_count</programlisting></para>
+    </section>
+    <section>
+      <title>Required arguments</title>
+      <section>
+        <title>entity</title>
+        <para><emphasis role="italic">entity</emphasis> argument specifies the type of Atomia Automation server entity that the action will be performed on. Can be one of three constant values: <emphasis role="bold">account</emphasis>, <emphasis role="bold">package</emphasis> or <emphasis role="bold">service</emphasis>.</para>
+      </section>
+      <section>
+        <title>action</title>
+        <para><emphasis role="italic">action</emphasis> argument specifies the type of action that will be performed on the given Atomia Automation server entity. Can be one of these constant values: <emphasis role="bold">show</emphasis>, <emphasis role="bold">list</emphasis>, <emphasis role="bold">find</emphasis>, <emphasis role="bold">add</emphasis>, <emphasis role="bold">delete</emphasis> or <emphasis role="bold">modify</emphasis>.</para>
+      </section>
+      <section>
+        <title>account</title>
+        <para><emphasis role="italic">account</emphasis> argument specifies the account number in the Automation server that the given entity belongs to.</para>
+      </section>
+    </section>
+    <section>
+      <title>Optional arguments</title>
+      <section>
+        <title>service_id</title>
+        <para><emphasis role="italic">service_id</emphasis> argument specifies the logical_id (GUID) of the parent service
+                        (<emphasis role="bold">add service</emphasis> and <emphasis role="bold">find service</emphasis> actions) or the given service
+                        (<emphasis role="bold">show service</emphasis>,  <emphasis role="bold">list service</emphasis>, <emphasis role="bold">modify service</emphasis> and <emphasis role="bold">delete service</emphasis> actions). <example>
+            <title/>
+            <programlisting>--service_id &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot;</programlisting>
+          </example></para>
+      </section>
+      <section>
+        <title>service_locator</title>
+        <para><emphasis role="italic">service_locator</emphasis> argument specifies the JSON representation (JSON array of objects)  of  the path to the parent service
+                        (<emphasis role="bold">add service</emphasis> and <emphasis role="bold">find service</emphasis> actions) or the given service
+                        (<emphasis role="bold">show service</emphasis>,  <emphasis role="bold">list service</emphasis>, <emphasis role="bold">modify service</emphasis> and <emphasis role="bold">delete service</emphasis> actions).<example>
+            <title/>
+            <programlisting>service_locator=&quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot;</programlisting>
+          </example> As shown, each of the array elements is a key-value pair, where the value can either be service_id, or key-value pair of property names and values, respectively.</para>
+        <para>This example would find the <emphasis role="bold">CsWindows</emphasis> service in Automation server with the <emphasis role="italic">Hostname</emphasis> property set to &quot;python43.org&quot;, located under the <emphasis role="bold">CsBase</emphasis> service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2.</para>
+      </section>
+      <section>
+        <title>service</title>
+        <para><emphasis role="italic">service</emphasis> argument is required with <emphasis role="bold">add service</emphasis> and <emphasis role="bold">modify service</emphasis> actions; for any other this argument is ignored. It is a JSON representation (key-value structure)   of  the service
+                        to be added or modified, with two possible keys: <emphasis role="italic">service_name</emphasis> and <emphasis role="italic">service_properties</emphasis>. </para>
+        <para><emphasis role="italic">service_name</emphasis> key is used with <emphasis role="bold">add service</emphasis> action only - it&apos;s value is the string representing the name of the service to be added.</para>
+        <para>The value defined by the <emphasis role="italic">service_properties</emphasis> key is a key-value structure of service properties&apos; names and values to be assigned to the service being added or modified.</para>
+        <para><example>
+            <title/>
+            <programlisting>-- service &quot;{ \&quot;service_name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;service_properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot;</programlisting>
+          </example></para>
+      </section>
+      <section>
+        <title>find_options</title>
+        <para><emphasis role="italic">find_options</emphasis> argument is required with <emphasis role="bold">find service</emphasis> action; for any other this argument is ignored. It is a JSON representation (key-value structure)   of  the additional required/optional arguments used with <emphasis role="bold">find service</emphasis>  action, with the following keys: </para>
+        <orderedlist>
+          <para><emphasis role="italic">service_name</emphasis> - required argument, defines the name of the service to search for</para>
+          <para><emphasis role="italic">relative_path</emphasis> - required argument, defines the relative path from the parent service (slash-delimited string of service names)</para>
+          <para><emphasis role="italic">service_properties</emphasis> - optional argument, defines the value(s) of the property(ies) of the service to match when searching for</para>
+          <para><emphasis role="italic">result_page</emphasis> - optional argument, defines the page number of the paged results (<emphasis role="italic">0</emphasis> by default) </para>
+          <para><emphasis role="italic">result_count</emphasis> - optional argument, defines the  number of items to return from the given paged results  (<emphasis role="italic">100</emphasis> by default) </para>
+        </orderedlist>
+        <example>
+          <title/>
+          <programlisting>--find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot;</programlisting>
+        </example>
+       </section>
+    </section>
+  </chapter>
+  <chapter>
+    <title>Usage examples</title>
+    <section>
+      <title>Show service</title>
+      <para>The <emphasis role="bold">Show</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot; service show 101320</programlisting>or <programlisting>atomia.py --service_locator &quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot; service show 101321</programlisting>which results with:<programlisting>{
+    &quot;status&quot;: &quot;Ok&quot;,
+    &quot;logical_id&quot;: &quot;c54a8e35-59ec-449a-b21d-c7053aec34e0&quot;,
+    &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+    &quot;name&quot;: &quot;CsWindowsWebsite&quot;,
+    &quot;current_request_id&quot;: &quot;&quot;,
+    &quot;friendly_name&quot;: &quot;IIS website complex service&quot;,
+    &quot;disabled&quot;: &quot;false&quot;,
+    &quot;parent_id&quot;: &quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2&quot;,
+    &quot;account_owner_id&quot;: &quot;101321&quot;,
+    &quot;physical_id&quot;: &quot;6669dc8b-974f-456c-94d7-88e185990072&quot;,
+    &quot;properties&quot;: [
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629558&quot;,
+            &quot;prop_string_value&quot;: &quot;gsB135.(&quot;,
+            &quot;name&quot;: &quot;ADPassword&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629559&quot;,
+            &quot;prop_string_value&quot;: &quot;python43.org&quot;,
+            &quot;name&quot;: &quot;DnsZone&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629557&quot;,
+            &quot;prop_string_value&quot;: &quot;&quot;,
+            &quot;name&quot;: &quot;DomainPrefix&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629560&quot;,
+            &quot;prop_string_value&quot;: &quot;172.16.16.5&quot;,
+            &quot;name&quot;: &quot;FtpResourceIp&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;true&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629556&quot;,
+            &quot;prop_string_value&quot;: &quot;python43.org&quot;,
+            &quot;name&quot;: &quot;Hostname&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629561&quot;,
+            &quot;prop_string_value&quot;: &quot;&quot;,
+            &quot;name&quot;: &quot;InfoEmailPassword&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629563&quot;,
+            &quot;prop_string_value&quot;: &quot;true&quot;,
+            &quot;name&quot;: &quot;InitDns&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629564&quot;,
+            &quot;prop_string_value&quot;: &quot;true&quot;,
+            &quot;name&quot;: &quot;InitEmail&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629565&quot;,
+            &quot;prop_string_value&quot;: &quot;v2.0&quot;,
+            &quot;name&quot;: &quot;InitNetVersion&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26629562&quot;,
+            &quot;prop_string_value&quot;: &quot;21&quot;,
+            &quot;name&quot;: &quot;RootFolderParentPath&quot;
+        }
+    ]
+}</programlisting></para>
+    </section>
+    <section>
+      <title>List service</title>
+      <para>The <emphasis role="bold">List</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of child services for the given service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot; service list 101321</programlisting>or <programlisting>atomia.py --service_locator &quot;[{\&quot;CsDatabase\&quot; : \&quot;ac83b69a-61fe-4a9a-ac1b-5eefa9153a22\&quot; }, {\&quot;CsMySqlDatabase\&quot; : \&quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5\&quot; } ]&quot; service list 101321</programlisting>which results with:<programlisting>[
+    {
+        &quot;status&quot;: &quot;Ok&quot;,
+        &quot;logical_id&quot;: &quot;314cc1bc-c1c8-4344-b764-bf11f921a07d&quot;,
+        &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+        &quot;name&quot;: &quot;DnsZone&quot;,
+        &quot;current_request_id&quot;: &quot;&quot;,
+        &quot;friendly_name&quot;: &quot;DNS Zone&quot;,
+        &quot;disabled&quot;: &quot;false&quot;,
+        &quot;account_owner_id&quot;: &quot;101321&quot;,
+        &quot;physical_id&quot;: &quot;f3eec488-0d5a-4533-8037-bbab8d6c97d8&quot;,
+        &quot;properties&quot;: [
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630431&quot;,
+                &quot;prop_string_value&quot;: &quot;1209600&quot;,
+                &quot;name&quot;: &quot;Expire&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630434&quot;,
+                &quot;prop_string_value&quot;: &quot;false&quot;,
+                &quot;name&quot;: &quot;IsReverse&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630432&quot;,
+                &quot;prop_string_value&quot;: &quot;1209600&quot;,
+                &quot;name&quot;: &quot;Minimum&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630427&quot;,
+                &quot;prop_string_value&quot;: &quot;ns1.int.atomia.com.&quot;,
+                &quot;name&quot;: &quot;Mname&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630429&quot;,
+                &quot;prop_string_value&quot;: &quot;1200&quot;,
+                &quot;name&quot;: &quot;Refresh&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630430&quot;,
+                &quot;prop_string_value&quot;: &quot;180&quot;,
+                &quot;name&quot;: &quot;Retry&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630428&quot;,
+                &quot;prop_string_value&quot;: &quot;registry.int.atomia.com.&quot;,
+                &quot;name&quot;: &quot;Rname&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630433&quot;,
+                &quot;prop_string_value&quot;: &quot;true&quot;,
+                &quot;name&quot;: &quot;Shared&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;true&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630425&quot;,
+                &quot;prop_string_value&quot;: &quot;mysql.int.atomia.com&quot;,
+                &quot;name&quot;: &quot;Zonename&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630426&quot;,
+                &quot;prop_string_value&quot;: &quot;3600&quot;,
+                &quot;name&quot;: &quot;Zonettl&quot;
+            }
+        ]
+    },
+    {
+        &quot;status&quot;: &quot;Ok&quot;,
+        &quot;logical_id&quot;: &quot;1fdf5a73-4edc-4ae6-b00d-7c18ba302eff&quot;,
+        &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+        &quot;name&quot;: &quot;MySQLDatabase&quot;,
+        &quot;current_request_id&quot;: &quot;&quot;,
+        &quot;friendly_name&quot;: &quot;MySQL Database&quot;,
+        &quot;disabled&quot;: &quot;false&quot;,
+        &quot;account_owner_id&quot;: &quot;101321&quot;,
+        &quot;physical_id&quot;: &quot;95b1a3d3-6401-40a5-8786-71b6b9e5f65c&quot;,
+        &quot;properties&quot;: [
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630423&quot;,
+                &quot;prop_string_value&quot;: &quot;utf8&quot;,
+                &quot;name&quot;: &quot;CharacterSet&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;false&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630424&quot;,
+                &quot;prop_string_value&quot;: &quot;utf8_unicode_ci&quot;,
+                &quot;name&quot;: &quot;Collation&quot;
+            },
+            {
+                &quot;is_key&quot;: &quot;true&quot;,
+                &quot;property_type&quot;: &quot;Integer&quot;,
+                &quot;id&quot;: &quot;26630422&quot;,
+                &quot;prop_string_value&quot;: &quot;101321-testpy&quot;,
+                &quot;name&quot;: &quot;DatabaseName&quot;
+            }
+        ]
+    }
+]</programlisting></para>
+    </section>
+    <section>
+      <title>Find service</title>
+      <para>The <emphasis role="bold">Find</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of services found for the given parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> and the given options target service(s) must comply with, defined by <emphasis role="italic">find_options</emphasis> argument.</para>
+      <para>The following command would find all <emphasis role="bold">ApacheWebSite</emphasis> services under the service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2, with <emphasis role="italic">CsLinuxWebsite</emphasis> in between (relative path from d83805a8-c4a3-4e17-96af-4c9f0c1679d2 to ApacheWebSite) - all ApacheWebSite services under all CsLinuxWebsite services under the service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2:</para>
+      <para><programlisting>atomia.py --service_id &quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2&quot; --find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot; service find 101321</programlisting></para>
+      <para>On the other hand, the following command would find all <emphasis role="bold">DnsZoneRecord</emphasis> services under root, with <emphasis role="italic">CsBase/CsWindowsWebsite/DnsZone </emphasis>in between (relative path from root to DnsZoneRecord) - all DnsZoneRecords under all DnsZone services under all CsWindowsWebsite services under all CsBase services:</para>
+      <programlisting>atomia.py --find_options &quot;{ \&quot;service_name\&quot; : \&quot;DnsZoneRecord\&quot;, \&quot;relative_path\&quot; : \&quot;CsBase/CsWindowsWebsite/DnsZone\&quot; }&quot; service find 101321</programlisting>
+    </section>
+    <section>
+      <title>Add service</title>
+      <para>The <emphasis role="bold">Add</emphasis> action of the <emphasis role="bold">service</emphasis> entity adds a new service to the Atomia Automation server, defined by the <emphasis role="italic">service</emphasis> argument, under the parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;b1568e33-14de-4c35-bb46-84009248c0d2&quot; --service &quot;{ \&quot;service_name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;service_properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot; service add 101321</programlisting>which results with:<programlisting>{
+    &quot;status&quot;: &quot;Ok&quot;,
+    &quot;logical_id&quot;: &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot;,
+    &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+    &quot;name&quot;: &quot;CsMySqlDatabase&quot;,
+    &quot;current_request_id&quot;: &quot;&quot;,
+    &quot;friendly_name&quot;: &quot;MySQL Databasee Complex Service&quot;,
+    &quot;disabled&quot;: &quot;false&quot;,
+    &quot;parent_id&quot;: &quot;b1568e33-14de-4c35-bb46-84009248c0d2&quot;,
+    &quot;account_owner_id&quot;: &quot;101321&quot;,
+    &quot;physical_id&quot;: &quot;1dc1431d-b494-4dcc-9fe4-475a2332d888&quot;,
+    &quot;properties&quot;: [
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631046&quot;,
+            &quot;prop_string_value&quot;: &quot;utf8&quot;,
+            &quot;name&quot;: &quot;CharacterSet&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631047&quot;,
+            &quot;prop_string_value&quot;: &quot;utf8_general_ci&quot;,
+            &quot;name&quot;: &quot;Collation&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;true&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631045&quot;,
+            &quot;prop_string_value&quot;: &quot;testpy45&quot;,
+            &quot;name&quot;: &quot;DatabaseName&quot;
+        }
+    ]
+}</programlisting></para>
+    </section>
+    <section>
+      <title>Modify service</title>
+      <para>The <emphasis role="bold">Modify</emphasis> action of the <emphasis role="bold">service</emphasis> entity modifies the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis>application arguments with the new property value(s), specified in the <emphasis role="italic">service</emphasis> argument arguments:<programlisting>atomia.py --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot; --service &quot;{ \&quot;service_properties\&quot; : { \&quot;Collation\&quot; : \&quot;utf8_unicode_ci\&quot;}}&quot; service modify 101321</programlisting>which results with:<programlisting>{
+    &quot;status&quot;: &quot;Ok&quot;,
+    &quot;logical_id&quot;: &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot;,
+    &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+    &quot;name&quot;: &quot;CsMySqlDatabase&quot;,
+    &quot;current_request_id&quot;: &quot;&quot;,
+    &quot;friendly_name&quot;: &quot;MySQL Databasee Complex Service&quot;,
+    &quot;disabled&quot;: &quot;false&quot;,
+    &quot;parent_id&quot;: &quot;b1568e33-14de-4c35-bb46-84009248c0d2&quot;,
+    &quot;account_owner_id&quot;: &quot;101321&quot;,
+    &quot;physical_id&quot;: &quot;1dc1431d-b494-4dcc-9fe4-475a2332d888&quot;,
+    &quot;properties&quot;: [
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631046&quot;,
+            &quot;prop_string_value&quot;: &quot;utf8&quot;,
+            &quot;name&quot;: &quot;CharacterSet&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;false&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631047&quot;,
+            &quot;prop_string_value&quot;: &quot;utf8_unicode_ci&quot;,
+            &quot;name&quot;: &quot;Collation&quot;
+        },
+        {
+            &quot;is_key&quot;: &quot;true&quot;,
+            &quot;property_type&quot;: &quot;Integer&quot;,
+            &quot;id&quot;: &quot;26631045&quot;,
+            &quot;prop_string_value&quot;: &quot;testpy45&quot;,
+            &quot;name&quot;: &quot;DatabaseName&quot;
+        }
+    ]
+}</programlisting></para>
+    </section>
+    <section>
+      <title>Delete service</title>
+      <para>The <emphasis role="bold">Delete </emphasis>action of the <emphasis role="bold">service</emphasis> entity deletes the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> from the Atomia Automation server:<programlisting>atomia.py --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot; service delete 101321</programlisting>which results with:<programlisting>Deleted service 4d518781-978c-4bff-8472-cef9d49c4c9b successfully.</programlisting></para>
+    </section>
+  </chapter>
+</book>
