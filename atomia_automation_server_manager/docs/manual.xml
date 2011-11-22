@@ -10,7 +10,7 @@
     <title>Usage</title>
     <section>
       <title>Overview</title>
-      <para>The current version of Atomia Automation Server Manager supports <emphasis role="bold">account</emphasis> and <emphasis role="bold">account</emphasis> entities. The support for <emphasis role="bold">package</emphasis>  entity will come in one of the next versions.</para>
+      <para>The current version of Atomia Automation Server Manager supports <emphasis role="bold">service</emphasis> and <emphasis role="bold">account</emphasis> entities. The support for <emphasis role="bold">package</emphasis>  entity will come in one of the next versions.</para>
       <para>The Atomia Automation Server Manager is executed by running <emphasis role="italic">atomia.py</emphasis> python script. This script has <emphasis role="bold">-h</emphasis> switch, which prints out the available arguments:<programlisting>usage: atomia [-h] [--username USERNAME] [--password PASSWORD]
               [--api_url API_URL] [--account_number ACCOUNT_NUMBER]
               [--service_id SERVICE_ID] [--path PATH] [--service SERVICE]
