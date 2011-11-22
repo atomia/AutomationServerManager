@@ -71,9 +71,21 @@ class AtomiaActions(object):
             
         self.client = SoapClient(wsdl=self.api_url, header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     
+    def list_accounts(self, page_number = "0", page_size = "100"):
+        
+        return self.client.ListAccountsWithPagination(pageNumber = page_number, pageSize = page_size, sortAsc = "true")
+    
+    def get_account(self, account_number):
+        
+        return self.client.GetAccount( accountId = account_number ) 
+    
     def add_account(self, account):
         
         return self.client.AddAccount(account = account)
+    
+    def delete_account(self, account_number):
+        
+        return self.client.DeleteAccount( accountId = account_number )
         
     def create_service(self, service_name, parent_service, account_number):
 

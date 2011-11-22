@@ -1,0 +1,4 @@
+[Automation Server API]
+username=atomia_username
+password=atomia_password
+url=https://example.com/CoreAPIBasicAuth.svc?wsdl

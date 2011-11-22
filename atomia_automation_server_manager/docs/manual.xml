@@ -10,42 +10,50 @@
     <title>Usage</title>
     <section>
       <title>Overview</title>
-      <para>The current version of Atomia Automation Server Manager supports <emphasis role="bold">account</emphasis> entity only. The support for <emphasis role="bold">package</emphasis> and <emphasis role="bold">account</emphasis> entities will come in one of the next versions.</para>
+      <para>The current version of Atomia Automation Server Manager supports <emphasis role="bold">account</emphasis> and <emphasis role="bold">account</emphasis> entities. The support for <emphasis role="bold">package</emphasis>  entity will come in one of the next versions.</para>
       <para>The Atomia Automation Server Manager is executed by running <emphasis role="italic">atomia.py</emphasis> python script. This script has <emphasis role="bold">-h</emphasis> switch, which prints out the available arguments:<programlisting>usage: atomia [-h] [--username USERNAME] [--password PASSWORD]
-              [--api_url API_URL] [--service_id SERVICE_ID]
-              [--service_locator SERVICE_LOCATOR] [--service SERVICE]
-              [--find_options FIND_OPTIONS]
-              entity action account
+              [--api_url API_URL] [--account_number ACCOUNT_NUMBER]
+              [--service_id SERVICE_ID] [--path PATH] [--service SERVICE]
+              [--find_options FIND_OPTIONS] [--account ACCOUNT]
+              entity action
 
 Atomia Automation Server Manager
 
 positional arguments:
   entity                account|package|service
   action                show|list|find|add|delete|modify
-  account               The account number in Automation Server
 
 optional arguments:
   -h, --help            show this help message and exit
   --username USERNAME   The API user&apos;s username
   --password PASSWORD   The API user&apos;s password
-  --api_url API_URL     The URL of the Automation Server API service
+  --api_url API_URL     The URL of the Automation Server API&apos;s wsdl
+  --account_number ACCOUNT_NUMBER
+                        The account number in Automation Server; Required
+                        argument for all actions with service entity, show
+                        account and delete account.
   --service_id SERVICE_ID
                         The string with logical id of the parent service
                         (add|find service actions) or the given service
                         (show|list|modify|delete service actions)
-  --service_locator SERVICE_LOCATOR
-                        The JSON representation of the path to the parent
+  --path PATH           The JSON representation of the path to the parent
                         service (add|find service actions) or the given
                         service (show|list|modify|delete service actions)
   --service SERVICE     Required argument when using add/modify service; Json
                         representation of the service to be added/modified
-                        with possible keys: service_name(required when adding)
-                        and service_properties(required when adding or
-                        modifying
+                        with possible keys: name(required when adding) and
+                        properties(required when adding or modifying
   --find_options FIND_OPTIONS
-                        Required argument when using find service; Json object
-                        with possible keys: service_name, relative_path,
-                        service_properties, result_page, result_count</programlisting></para>
+                        Required argument when using find service, optional
+                        when using list accounts; Json object with possible
+                        keys: service_name, relative_path, service_properties,
+                        result_page, result_count
+  --account ACCOUNT     Required argument when adding account; Json object
+                        with possible keys: account_id, account_description,
+                        account_properties, provisioning_description
+</programlisting><note>
+          <para>The order of the arguments is not important.</para>
+        </note></para>
     </section>
     <section>
       <title>Required arguments</title>
@@ -57,13 +65,13 @@ optional arguments:
         <title>action</title>
         <para><emphasis role="italic">action</emphasis> argument specifies the type of action that will be performed on the given Atomia Automation server entity. Can be one of these constant values: <emphasis role="bold">show</emphasis>, <emphasis role="bold">list</emphasis>, <emphasis role="bold">find</emphasis>, <emphasis role="bold">add</emphasis>, <emphasis role="bold">delete</emphasis> or <emphasis role="bold">modify</emphasis>.</para>
       </section>
-      <section>
-        <title>account</title>
-        <para><emphasis role="italic">account</emphasis> argument specifies the account number in the Automation server that the given entity belongs to.</para>
-      </section>
     </section>
     <section>
       <title>Optional arguments</title>
+      <section>
+        <title>account_number</title>
+        <para><emphasis role="italic">account_number</emphasis> argument specifies the account number in the Automation server that the given entity belongs to. This argument is required for all actions with <emphasis role="bold">service</emphasis> entity, as well as show and delete account actions.</para>
+      </section>
       <section>
         <title>username</title>
         <para><emphasis role="italic">username</emphasis> argument specifies the username of the API user, used for Atomia Automation server API authentication/authorization.  If omitted, the username will be taken from the configuration file named <emphasis role="bold">atomia.conf</emphasis>, located in the same folder as <emphasis role="bold">atomia.py</emphasis> or /etc directory.</para>
@@ -86,24 +94,24 @@ optional arguments:
           </example></para>
       </section>
       <section>
-        <title>service_locator</title>
-        <para><emphasis role="italic">service_locator</emphasis> argument specifies the JSON representation (JSON array of objects)  of  the path to the parent service
+        <title>path</title>
+        <para><emphasis role="italic">path</emphasis> argument specifies the JSON representation (JSON array of objects)  of  the path to the parent service
                         (<emphasis role="bold">add service</emphasis> and <emphasis role="bold">find service</emphasis> actions) or the given service
                         (<emphasis role="bold">show service</emphasis>,  <emphasis role="bold">list service</emphasis>, <emphasis role="bold">modify service</emphasis> and <emphasis role="bold">delete service</emphasis> actions).<example>
             <title/>
-            <programlisting>service_locator=&quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot;</programlisting>
+            <programlisting>--path &quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot;</programlisting>
           </example> As shown, each of the array elements is a key-value pair, where the value can either be service_id, or key-value pair of property names and values, respectively.</para>
         <para>This example would find the <emphasis role="bold">CsWindows</emphasis> service in Automation server with the <emphasis role="italic">Hostname</emphasis> property set to &quot;python43.org&quot;, located under the <emphasis role="bold">CsBase</emphasis> service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2.</para>
       </section>
       <section>
         <title>service</title>
         <para><emphasis role="italic">service</emphasis> argument is required with <emphasis role="bold">add service</emphasis> and <emphasis role="bold">modify service</emphasis> actions; for any other this argument is ignored. It is a JSON representation (key-value structure)   of  the service
-                        to be added or modified, with two possible keys: <emphasis role="italic">service_name</emphasis> and <emphasis role="italic">service_properties</emphasis>. </para>
-        <para><emphasis role="italic">service_name</emphasis> key is used with <emphasis role="bold">add service</emphasis> action only - it&apos;s value is the string representing the name of the service to be added.</para>
-        <para>The value defined by the <emphasis role="italic">service_properties</emphasis> key is a key-value structure of service properties&apos; names and values to be assigned to the service being added or modified.</para>
+                        to be added or modified, with two possible keys: <emphasis role="italic">name</emphasis> and <emphasis role="italic">properties</emphasis>. </para>
+        <para><emphasis role="italic">name</emphasis> key is used with <emphasis role="bold">add service</emphasis> action only - it&apos;s value is the string representing the name of the service to be added.</para>
+        <para>The value defined by the <emphasis role="italic">properties</emphasis> key is a key-value structure of service properties&apos; names and values to be assigned to the service being added or modified.</para>
         <para><example>
             <title/>
-            <programlisting>-- service &quot;{ \&quot;service_name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;service_properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot;</programlisting>
+            <programlisting>--service &quot;{ \&quot;name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot;</programlisting>
           </example></para>
       </section>
       <section>
@@ -121,13 +129,27 @@ optional arguments:
           <programlisting>--find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot;</programlisting>
         </example>
       </section>
+      <section>
+        <title>account</title>
+        <para><emphasis role="italic">account</emphasis> argument is required with <emphasis role="bold">add account</emphasis> action; for any other this argument is ignored. It is a JSON representation (key-value structure)   of  the account properties used when creating a new account, with the following keys: </para>
+        <orderedlist>
+          <para><emphasis role="italic">account_id</emphasis> - required argument, defines the name of the new account in Atomia Automation server</para>
+          <para><emphasis role="italic">account_description</emphasis> - optional argument, defines the description of the new account </para>
+          <para><emphasis role="italic">account_properties</emphasis> - optional argument, defines the additional properties (key-value pairs) to be assigned to the new account</para>
+          <para>provisioning_description - optional argument, defines the name of the provisioning description to be assigned to the new account (if omitted, new account will get the default provisioning description in the Atomia Automation server) </para>
+        </orderedlist>
+        <example>
+          <title/>
+          <programlisting> --account &quot;{ \&quot;account_id\&quot; : \&quot;atomiatest001\&quot;, \&quot;account_properties\&quot; : { \&quot;ResellerRootPath\&quot; : \&quot;/00/100000/\&quot;, \&quot;test\&quot;:\&quot;myprop\&quot; }, \&quot;account_description\&quot; : \&quot;My desc\&quot;, \&quot;provisioning_description\&quot;:\&quot;ProvisioningDescription\&quot; }&quot;</programlisting>
+        </example>
+      </section>
     </section>
   </chapter>
   <chapter>
     <title>Usage examples</title>
     <section>
       <title>Show service</title>
-      <para>The <emphasis role="bold">Show</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot; service show 101320</programlisting>or <programlisting>atomia.py --service_locator &quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot; service show 101321</programlisting>which results with:<programlisting>{
+      <para>The <emphasis role="bold">Show</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path </emphasis> application arguments:<programlisting>atomia.py service show --account_number &quot;101320&quot; --service_id &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot;</programlisting>or <programlisting>atomia.py service show --account_number &quot;101320&quot; --path &quot;[{\&quot;CsBase\&quot; : \&quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2\&quot; }, {\&quot;CsWindowsWebsite\&quot; : {\&quot;Hostname\&quot;:\&quot;python43.org\&quot;} } ]&quot; </programlisting>which results with:<programlisting>{
     &quot;status&quot;: &quot;Ok&quot;,
     &quot;logical_id&quot;: &quot;c54a8e35-59ec-449a-b21d-c7053aec34e0&quot;,
     &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
@@ -214,7 +236,7 @@ optional arguments:
     </section>
     <section>
       <title>List service</title>
-      <para>The <emphasis role="bold">List</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of child services for the given service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot; service list 101321</programlisting>or <programlisting>atomia.py --service_locator &quot;[{\&quot;CsDatabase\&quot; : \&quot;ac83b69a-61fe-4a9a-ac1b-5eefa9153a22\&quot; }, {\&quot;CsMySqlDatabase\&quot; : \&quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5\&quot; } ]&quot; service list 101321</programlisting>which results with:<programlisting>[
+      <para>The <emphasis role="bold">List</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of child services for the given service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path</emphasis> application arguments:<programlisting>atomia.py service list --account_number &quot;101321&quot; --service_id &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot;</programlisting>or <programlisting>atomia.py service show --account_number &quot;101321&quot; --path &quot;[{\&quot;CsDatabase\&quot; : \&quot;ac83b69a-61fe-4a9a-ac1b-5eefa9153a22\&quot; }, {\&quot;CsMySqlDatabase\&quot; : \&quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5\&quot; } ]&quot;</programlisting>which results with:<programlisting>[
     {
         &quot;status&quot;: &quot;Ok&quot;,
         &quot;logical_id&quot;: &quot;314cc1bc-c1c8-4344-b764-bf11f921a07d&quot;,
@@ -336,15 +358,15 @@ optional arguments:
     </section>
     <section>
       <title>Find service</title>
-      <para>The <emphasis role="bold">Find</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of services found for the given parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> and the given options target service(s) must comply with, defined by <emphasis role="italic">find_options</emphasis> argument.</para>
+      <para>The <emphasis role="bold">Find</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of services found for the given parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path</emphasis> and the given options target service(s) must comply with, defined by <emphasis role="italic">find_options</emphasis> argument.</para>
       <para>The following command would find all <emphasis role="bold">ApacheWebSite</emphasis> services under the service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2, with <emphasis role="italic">CsLinuxWebsite</emphasis> in between (relative path from d83805a8-c4a3-4e17-96af-4c9f0c1679d2 to ApacheWebSite) - all ApacheWebSite services under all CsLinuxWebsite services under the service with logical_id d83805a8-c4a3-4e17-96af-4c9f0c1679d2:</para>
-      <para><programlisting>atomia.py --service_id &quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2&quot; --find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot; service find 101321</programlisting></para>
+      <para><programlisting>atomia.py service find --account_number &quot;101321&quot; --service_id &quot;d83805a8-c4a3-4e17-96af-4c9f0c1679d2&quot; --find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot;</programlisting></para>
       <para>On the other hand, the following command would find all <emphasis role="bold">DnsZoneRecord</emphasis> services under root, with <emphasis role="italic">CsBase/CsWindowsWebsite/DnsZone </emphasis>in between (relative path from root to DnsZoneRecord) - all DnsZoneRecords under all DnsZone services under all CsWindowsWebsite services under all CsBase services:</para>
-      <programlisting>atomia.py --find_options &quot;{ \&quot;service_name\&quot; : \&quot;DnsZoneRecord\&quot;, \&quot;relative_path\&quot; : \&quot;CsBase/CsWindowsWebsite/DnsZone\&quot; }&quot; service find 101321</programlisting>
+      <programlisting>atomia.py service find --account_number &quot;101321&quot; --find_options &quot;{ \&quot;service_name\&quot; : \&quot;DnsZoneRecord\&quot;, \&quot;relative_path\&quot; : \&quot;CsBase/CsWindowsWebsite/DnsZone\&quot; }&quot;</programlisting>
     </section>
     <section>
       <title>Add service</title>
-      <para>The <emphasis role="bold">Add</emphasis> action of the <emphasis role="bold">service</emphasis> entity adds a new service to the Atomia Automation server, defined by the <emphasis role="italic">service</emphasis> argument, under the parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> application arguments:<programlisting>atomia.py --service_id &quot;b1568e33-14de-4c35-bb46-84009248c0d2&quot; --service &quot;{ \&quot;service_name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;service_properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot; service add 101321</programlisting>which results with:<programlisting>{
+      <para>The <emphasis role="bold">Add</emphasis> action of the <emphasis role="bold">service</emphasis> entity adds a new service to the Atomia Automation server, defined by the <emphasis role="italic">service</emphasis> argument, under the parent service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path</emphasis> application arguments:<programlisting>atomia.py service add --account_number &quot;101321&quot; --service_id &quot;b1568e33-14de-4c35-bb46-84009248c0d2&quot; --service &quot;{ \&quot;name\&quot; : \&quot;CsMySqlDatabase\&quot;, \&quot;properties\&quot; : { \&quot;DatabaseName\&quot; : \&quot;testpy45\&quot;, \&quot;CharacterSet\&quot; : \&quot;utf8\&quot;, \&quot;Collation\&quot; : \&quot;utf8_general_ci\&quot;}}&quot;</programlisting>which results with:<programlisting>{
     &quot;status&quot;: &quot;Ok&quot;,
     &quot;logical_id&quot;: &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot;,
     &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
@@ -382,7 +404,7 @@ optional arguments:
     </section>
     <section>
       <title>Modify service</title>
-      <para>The <emphasis role="bold">Modify</emphasis> action of the <emphasis role="bold">service</emphasis> entity modifies the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis>application arguments with the new property value(s), specified in the <emphasis role="italic">service</emphasis> argument arguments:<programlisting>atomia.py --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot; --service &quot;{ \&quot;service_properties\&quot; : { \&quot;Collation\&quot; : \&quot;utf8_unicode_ci\&quot;}}&quot; service modify 101321</programlisting>which results with:<programlisting>{
+      <para>The <emphasis role="bold">Modify</emphasis> action of the <emphasis role="bold">service</emphasis> entity modifies the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path </emphasis>application arguments with the new property value(s), specified in the <emphasis role="italic">service</emphasis> argument arguments:<programlisting>atomia.py service modify --account_number &quot;101321&quot; --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot; --service &quot;{ \&quot;properties\&quot; : { \&quot;Collation\&quot; : \&quot;utf8_unicode_ci\&quot;}}&quot;</programlisting>which results with:<programlisting>{
     &quot;status&quot;: &quot;Ok&quot;,
     &quot;logical_id&quot;: &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot;,
     &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
@@ -420,7 +442,86 @@ optional arguments:
     </section>
     <section>
       <title>Delete service</title>
-      <para>The <emphasis role="bold">Delete </emphasis>action of the <emphasis role="bold">service</emphasis> entity deletes the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">service_locator </emphasis> from the Atomia Automation server:<programlisting>atomia.py --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot; service delete 101321</programlisting>which results with:<programlisting>Deleted service 4d518781-978c-4bff-8472-cef9d49c4c9b successfully.</programlisting></para>
+      <para>The <emphasis role="bold">Delete </emphasis>action of the <emphasis role="bold">service</emphasis> entity deletes the service defined by <emphasis role="italic">service_id</emphasis> or <emphasis role="italic">path</emphasis> from the Atomia Automation server:<programlisting>atomia.py service delete --account_number &quot;101321&quot; --service_id &quot;4d518781-978c-4bff-8472-cef9d49c4c9b&quot;</programlisting>which results with:<programlisting>Deleted service 4d518781-978c-4bff-8472-cef9d49c4c9b successfully.</programlisting></para>
+    </section>
+    <section>
+      <title>List account</title>
+      <para>The <emphasis role="bold">List </emphasis>action of the <emphasis role="bold">account</emphasis> entity displays paginated set of the existing accounts from the Atomia Automation server. The number of accounts and the page number can be set using the <emphasis role="italic">find_options </emphasis>optional argument (by default set to first 100 accounts):<programlisting>atomia.py account list --find_options &quot;{\&quot;result_count\&quot; : \&quot;3\&quot;, \&quot;result_page\&quot;:\&quot;0\&quot; }&quot;</programlisting>which results with:<programlisting>[
+    {
+        &quot;current_request_id&quot;: &quot;&quot;,
+        &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+        &quot;account_id&quot;: &quot;100000&quot;,
+        &quot;is_active&quot;: &quot;true&quot;,
+        &quot;account_description&quot;: &quot;&quot;,
+        &quot;account_properties&quot;: []
+    },
+    {
+        &quot;current_request_id&quot;: &quot;&quot;,
+        &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+        &quot;account_id&quot;: &quot;100001&quot;,
+        &quot;is_active&quot;: &quot;true&quot;,
+        &quot;account_description&quot;: &quot;&quot;,
+        &quot;account_properties&quot;: [
+            {
+                &quot;key&quot;: &quot;ResellerRootPath&quot;,
+                &quot;value&quot;: &quot;/00/100000/&quot;
+            }
+        ]
+    },
+    {
+        &quot;current_request_id&quot;: &quot;&quot;,
+        &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+        &quot;account_id&quot;: &quot;100002&quot;,
+        &quot;is_active&quot;: &quot;true&quot;,
+        &quot;account_description&quot;: &quot;&quot;,
+        &quot;account_properties&quot;: [
+            {
+                &quot;key&quot;: &quot;ResellerRootPath&quot;,
+                &quot;value&quot;: &quot;/00/100000/&quot;
+            }
+        ]
+    }
+]</programlisting></para>
+    </section>
+    <section>
+      <title>Show account</title>
+      <para>The <emphasis role="bold">Show </emphasis>action of the <emphasis role="bold">account</emphasis> entity displays the properties of the account defined by <emphasis role="bold">account_number</emphasis> argument (which is required here):<programlisting>atomia.py account show --account_number &quot;100001&quot;</programlisting>which results with:<programlisting>{
+    &quot;current_request_id&quot;: &quot;&quot;,
+    &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+    &quot;account_id&quot;: &quot;100001&quot;,
+    &quot;is_active&quot;: &quot;true&quot;,
+    &quot;account_description&quot;: &quot;&quot;,
+    &quot;account_properties&quot;: [
+        {
+            &quot;value&quot;: &quot;/00/100000/&quot;,
+            &quot;key&quot;: &quot;ResellerRootPath&quot;
+        }
+    ]
+}</programlisting></para>
+    </section>
+    <section>
+      <title>Add account</title>
+      <para>The <emphasis role="bold">Add </emphasis>action of the <emphasis role="bold">account</emphasis> entity creates a new account in the Atomia Automation server, based on the <emphasis role="bold">account</emphasis> argument (which is required here):<programlisting>atomia.py account add  --account &quot; { \&quot;account_id\&quot; : \&quot;atomia001\&quot;, \&quot;account_properties\&quot; : { \&quot;ResellerRootPath\&quot; : \&quot;/00/100000/\&quot;, \&quot;test\&quot;:\&quot;myprop\&quot; }, \&quot;account_description\&quot; : \&quot;My desc\&quot;, \&quot;provisioning_description\&quot;:\&quot;ProvisioningDescription\&quot; }&quot;</programlisting>which results with:<programlisting>{
+    &quot;current_request_id&quot;: &quot;&quot;,
+    &quot;provisioning_description&quot;: &quot;ProvisioningDescription&quot;,
+    &quot;account_id&quot;: &quot;atomia001&quot;,
+    &quot;is_active&quot;: &quot;false&quot;,
+    &quot;account_description&quot;: &quot;My desc&quot;,
+    &quot;account_properties&quot;: [
+        {
+            &quot;value&quot;: &quot;myprop&quot;,
+            &quot;key&quot;: &quot;test&quot;
+        },
+        {
+            &quot;value&quot;: &quot;/00/100000/&quot;,
+            &quot;key&quot;: &quot;ResellerRootPath&quot;
+        }
+    ]
+}</programlisting></para>
+    </section>
+    <section>
+      <title>Delete account</title>
+      <para>The <emphasis role="bold">Delete </emphasis>action of the <emphasis role="bold">account</emphasis> entity deletes the  account from Atomia Automation server, defined by <emphasis role="bold">account_number</emphasis> argument (which is required here):<programlisting>atomia.py account delete --account_number &quot;atomia001&quot;</programlisting>which results with:<programlisting>Deleted account atomia001 successfully.</programlisting></para>
     </section>
   </chapter>
 </book>
