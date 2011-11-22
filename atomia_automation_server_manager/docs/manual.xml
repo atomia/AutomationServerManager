@@ -1,6 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<!-- This document was created with Syntext Serna Free. -->
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "docbookV4.5/docbookx.dtd" []>
+<!-- This document was created with Syntext Serna Free. --><!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "docbookV4.5/docbookx.dtd" []>
 <book>
   <title>Atomia Automation Server Manager manual</title>
   <preface>
@@ -66,6 +65,18 @@ optional arguments:
     <section>
       <title>Optional arguments</title>
       <section>
+        <title>username</title>
+        <para><emphasis role="italic">username</emphasis> argument specifies the username of the API user, used for Atomia Automation server API authentication/authorization.  If omitted, the username will be taken from the configuration file named <emphasis role="bold">atomia.conf</emphasis>, located in the same folder as <emphasis role="bold">atomia.py</emphasis> or /etc directory.</para>
+      </section>
+      <section>
+        <title>password</title>
+        <para><emphasis role="italic">password</emphasis> argument specifies the password of the API user, used for Atomia Automation server API authentication/authorization.  If omitted, the password will be taken from the configuration file named <emphasis role="bold">atomia.conf</emphasis>, located in the same folder as <emphasis role="bold">atomia.py</emphasis> or /etc directory.</para>
+      </section>
+      <section>
+        <title>api_url</title>
+        <para><emphasis role="italic">api_url</emphasis> argument specifies the location of the wsdl file of the Atomia Automation server API.  If omitted, the url will be taken from the configuration file named <emphasis role="bold">atomia.conf</emphasis>, located in the same folder as <emphasis role="bold">atomia.py</emphasis> or /etc directory.</para>
+      </section>
+      <section>
         <title>service_id</title>
         <para><emphasis role="italic">service_id</emphasis> argument specifies the logical_id (GUID) of the parent service
                         (<emphasis role="bold">add service</emphasis> and <emphasis role="bold">find service</emphasis> actions) or the given service
@@ -109,7 +120,7 @@ optional arguments:
           <title/>
           <programlisting>--find_options &quot;{ \&quot;service_name\&quot; : \&quot;ApacheWebSite\&quot;, \&quot;relative_path\&quot; : \&quot;CsLinuxWebsite\&quot;, \&quot;service_properties\&quot; : { \&quot;PhpVersion\&quot; : \&quot;5.2\&quot;} }&quot;</programlisting>
         </example>
-       </section>
+      </section>
     </section>
   </chapter>
   <chapter>

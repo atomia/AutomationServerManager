@@ -59,7 +59,7 @@ def json_repr(obj):
 def service_show(args, manager):
     service_to_print = find_service_by_arguments(args, manager)
     if service_to_print is not None:
-        service_to_print.print_me()
+        service_to_print.print_me
         return service_to_print
     else:
         raise Exception("No service found!")
@@ -299,7 +299,7 @@ def find_service_by_arguments(args, manager):
         return None
 
 def main(args):
-    manager = AtomiaActions(args.username if args.username is not None else 'Admin', args.password if args.password is not None else 'Admin123')
+    manager = AtomiaActions(username = args.username, password = args.password, api_url = args.api_url)
     if args.entity == 'service':
         if args.action == 'show':
             return service_show(args, manager)
@@ -323,7 +323,7 @@ if __name__=="__main__":
     parser = argparse.ArgumentParser(description='Atomia Automation Server Manager', prog='atomia')
     parser.add_argument('--username', help="The API user's username")
     parser.add_argument('--password', help="The API user's password")
-    parser.add_argument('--api_url', help="The URL of the Automation Server API service")
+    parser.add_argument('--api_url', help="The URL of the Automation Server API's wsdl")
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
     parser.add_argument('account', help='The account number in Automation Server')

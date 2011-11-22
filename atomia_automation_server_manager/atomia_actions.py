@@ -8,10 +8,11 @@ from pysimplesoap.client import SoapClient
 from pysimplesoap.simplexml import SimpleXMLElement
 from datetime import datetime
 import atomia_entities
+import ConfigParser, os
 
 class AtomiaActions(object):
     
-    def __init__(self, username, password, api_url = None, token_created = None, token_expires = None, soap_header = None, body_xmlns = None):
+    def __init__(self, username = None, password = None, api_url = None, token_created = None, token_expires = None, soap_header = None, body_xmlns = None):
 
         if token_created is None:
             self.created = datetime.fromtimestamp(time.mktime(time.gmtime())).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -26,6 +27,19 @@ class AtomiaActions(object):
         self.username = username
         self.password = password
         self.api_url = api_url
+        
+        if self.username is None or self.password is None or self.api_url is None:
+            config = ConfigParser.ConfigParser()
+            conf_file = config.read(['atomia.conf', os.path.abspath('/etc/atomia.conf')])
+            if conf_file is not None and len(conf_file) > 0:
+                if self.username is None:
+                    self.username = config.get("Automation Server API", "username")
+                if self.password is None:
+                    self.password = config.get("Automation Server API", "password")
+                if self.api_url is None:
+                    self.api_url = config.get("Automation Server API", "url")
+            else:
+                raise Exception("Could not find the config file!")
         
         if soap_header is None:
 
@@ -55,7 +69,7 @@ class AtomiaActions(object):
         else:
             self.body_xmlns = body_xmlns
             
-        self.client = SoapClient(wsdl=self.api_url if self.api_url is not None else "https://provisioning.int.atomia.com/CoreAPIBasicAuth.svc?wsdl", header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+        self.client = SoapClient(wsdl=self.api_url, header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=False)
     
     def add_account(self, account):
         
