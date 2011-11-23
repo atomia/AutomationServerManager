@@ -68,18 +68,18 @@ def service_list(args, manager):
     current_service = find_service_by_arguments(args, manager)
     if current_service is not None:
         child_services_result = manager.list_existing_service([current_service.to_xml_friendly_object()], args.account_number)
-        if child_services_result.has_key("ListExistingServicesResult") and len(child_services_result["ListExistingServicesResult"].children()) > 0:
-            list_result_list = []
-            for j in child_services_result["ListExistingServicesResult"].children():
-                child_service = AtomiaService()
-                child_service.from_simplexml(j)
-                list_result_list.append(child_service.to_print_friendly(False))
-            print json_repr(list_result_list) 
-            return list_result_list
-        else:
-            raise Exception("No child services found for the service with logical id: " + current_service.logical_id)
     else:
-        raise Exception("No parent service found!")
+        child_services_result = manager.list_existing_service(None, args.account_number)
+    if child_services_result.has_key("ListExistingServicesResult") and len(child_services_result["ListExistingServicesResult"].children()) > 0:
+        list_result_list = []
+        for j in child_services_result["ListExistingServicesResult"].children():
+            child_service = AtomiaService()
+            child_service.from_simplexml(j)
+            list_result_list.append(child_service.to_print_friendly(False))
+        print json_repr(list_result_list) 
+        return list_result_list
+    else:
+        raise Exception("No child services found for the service with logical id: " + current_service.logical_id)
     
 def service_find(args, manager):
     
@@ -427,8 +427,8 @@ def main(args):
                 return account_delete(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
-
-if __name__=="__main__":
+    
+def entry():
     
     import argparse
     
@@ -457,4 +457,5 @@ if __name__=="__main__":
         print "Api returned an error: \n", dom.toprettyxml()
         sys.exit()
 
-       
+if __name__=="__main__":
+    entry()   

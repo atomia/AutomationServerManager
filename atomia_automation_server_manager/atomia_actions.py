@@ -30,7 +30,7 @@ class AtomiaActions(object):
         
         if self.username is None or self.password is None or self.api_url is None:
             config = ConfigParser.ConfigParser()
-            conf_file = config.read(['atomia.conf', os.path.abspath('/etc/atomia.conf')])
+            conf_file = config.read(['atomia.conf', os.path.dirname(os.path.realpath(__file__)) + '/atomia.conf', os.path.abspath('/etc/atomia.conf')])
             if conf_file is not None and len(conf_file) > 0:
                 if self.username is None:
                     self.username = config.get("Automation Server API", "username")
