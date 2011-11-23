@@ -67,8 +67,7 @@ def test_show_existing_service_description_2():
     
 def test_list_no_service():
     mock = ArgumentsMock(entity="service", action = "list", account_number="101321")
-    with pytest.raises(Exception):
-        atomia.main(mock)
+    assert isinstance(atomia.main(mock), list)
     
 def test_list_non_existing_service_id():
     mock = ArgumentsMock(entity="service", action = "list", service_id="00000000-0000-0000-0000-000000000000")

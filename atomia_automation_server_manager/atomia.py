@@ -5,8 +5,8 @@ Created on Nov 7, 2011
 
 '''
 import time
-from pysimplesoap.client import SoapClient
-from pysimplesoap.simplexml import SimpleXMLElement
+from pysimplesoap_atomia.client import SoapClient
+from pysimplesoap_atomia.simplexml import SimpleXMLElement
 from datetime import datetime
 from atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCriteria, AtomiaServiceSearchCriteriaProperty
 from atomia_actions import AtomiaActions
@@ -69,7 +69,10 @@ def service_list(args, manager):
     if current_service is not None:
         child_services_result = manager.list_existing_service([current_service.to_xml_friendly_object()], args.account_number)
     else:
-        child_services_result = manager.list_existing_service(None, args.account_number)
+        if args.service_id is not None or args.path is not None:
+            raise Exception("Could not find the parent service.")
+        else:
+            child_services_result = manager.list_existing_service(None, args.account_number)
     if child_services_result.has_key("ListExistingServicesResult") and len(child_services_result["ListExistingServicesResult"].children()) > 0:
         list_result_list = []
         for j in child_services_result["ListExistingServicesResult"].children():

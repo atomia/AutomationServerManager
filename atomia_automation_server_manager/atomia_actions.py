@@ -4,8 +4,8 @@ Created on Nov 7, 2011
 @author: Dusan
 '''
 import time
-from pysimplesoap.client import SoapClient
-from pysimplesoap.simplexml import SimpleXMLElement
+from pysimplesoap_atomia.client import SoapClient
+from pysimplesoap_atomia.simplexml import SimpleXMLElement
 from datetime import datetime
 import atomia_entities
 import ConfigParser, os
