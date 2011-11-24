@@ -11,17 +11,17 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "Atomia Automation Server Manager",
+    name = "atomia_manager",
     version = "0.0.1",
     author = "Atomia",
     author_email = "dusan@atomia.com",
     description = ("Command-line app for Atomia Automation Server management."),
     license = "GPL",
     keywords = "atomia automation command-line",
-    url = "http://packages.python.org/Atomia Automation Server Manager",
+    #url = "http://packages.python.org/Atomia Automation Server Manager",
     packages=find_packages(),
     long_description=read('README.md'),
-	install_requires=['argparse'],
+	install_requires=['argparse >= 1.1'],
 	setup_requires=['setuptools'],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -32,7 +32,7 @@ setup(
     ],
 	entry_points={
         'console_scripts': [
-            'atomia = atomia_automation_server_manager.atomia:entry',
+            'atomia = atomia_manager.atomia:entry',
 		],
 	},
 	package_data = {
