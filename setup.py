@@ -18,7 +18,7 @@ setup(
     description = ("Command-line app for Atomia Automation Server management."),
     license = "GPL",
     keywords = "atomia automation command-line",
-    url = "http://packages.python.org/Atomia Automation Server Manager",
+    url = "https://github.com/atomia/AutomationServerManager",
     packages=find_packages(),
     long_description=read('README.md'),
 	install_requires=['argparse'],
