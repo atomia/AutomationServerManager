@@ -53,7 +53,7 @@ def json_repr(obj):
     return json.dumps(serialize(obj), indent = 4)
 
 def service_show(args, manager):
-    service_to_print = find_service_by_arguments(args, manager)
+    service_to_print = find_service_by_arguments(manager, args.account, args.service, args.path)
     if service_to_print is not None:
         service_to_print.print_me()
         return service_to_print
@@ -61,11 +61,11 @@ def service_show(args, manager):
         raise Exception("No service found!")
 
 def service_list(args, manager):
-    current_service = find_service_by_arguments(args, manager)
+    current_service = find_service_by_arguments(manager, args.account, args.service, args.path)
     if current_service is not None:
         child_services_result = manager.list_existing_service([current_service.to_xml_friendly_object()], args.account)
     else:
-        if args.service_id is not None or args.path is not None:
+        if args.service is not None or args.path is not None:
             raise Exception("Could not find the parent service.")
         else:
             child_services_result = manager.list_existing_service(None, args.account)
@@ -106,7 +106,7 @@ def service_find(args, manager):
     else:
         raise InputError("query is required argument for this action.")
     
-    parent_service = find_service_by_arguments(args, manager)
+    parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
     
     service_search_criteria_list = []
     search_properties = []
@@ -157,7 +157,7 @@ def service_add(args, manager):
     else:
         raise InputError("service is required argument for this action.")
     
-    parent_service = find_service_by_arguments(args, manager)
+    parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
     
     if parent_service is not None:
         created_service_result = manager.create_service(service_name, [parent_service.to_xml_friendly_object()], args.account)
@@ -193,7 +193,7 @@ def service_add(args, manager):
         raise Exception("Could not create service: " + service_name)
 
 def service_delete(args, manager):
-    service_to_delete = find_service_by_arguments(args, manager)
+    service_to_delete = find_service_by_arguments(manager, args.account, args.service, args.path)
     if service_to_delete is not None:
         manager.delete_service([service_to_delete.to_xml_friendly_object()], args.account)
         print "Deleted service " + service_to_delete.logical_id + " successfully."
@@ -219,7 +219,7 @@ def service_modify(args, manager):
     else:
         raise InputError("service is required argument for this action.")
     
-    current_service = find_service_by_arguments(args, manager)
+    current_service = find_service_by_arguments(manager, args.account, args.service, args.path)
     if current_service is None:
         raise Exception("Could not find service to be modified.")
     
@@ -245,18 +245,18 @@ def service_modify(args, manager):
         else:
             raise Exception("Could not modify service: " + current_service.name)
                     
-def find_service_by_arguments(args, manager):
+def find_service_by_arguments(manager, account, service_id, path):
     
-    if args.service_id is not None:
-        show_service_instance = manager.get_service_by_id(args.account, args.service_id)
+    if service_id is not None:
+        show_service_instance = manager.get_service_by_id(account, service_id)
         if show_service_instance.has_key("GetServiceByIdResult") and len(show_service_instance["GetServiceByIdResult"]) == 1:
             for k in show_service_instance["GetServiceByIdResult"]:
                 service_to_return = AtomiaService()
                 service_to_return.from_simplexml(k)
                 return service_to_return if service_to_return.logical_id is not None else None
         
-    elif args.path is not None:
-        show_service_locator = json.loads(args.path)
+    elif path is not None:
+        show_service_locator = json.loads(path)
         if len(show_service_locator) > 0:
             parent_service_for_criteria = None
             for count in show_service_locator:
@@ -272,7 +272,7 @@ def find_service_by_arguments(args, manager):
                     for propk in count.values()[0]:
                         tmp_property = AtomiaServiceSearchCriteriaProperty(str(propk), str(count.values()[0][propk]))
                         search_properties.append(tmp_property.to_xml_friendly_object('arr:KeyValueOfstringstring', 'KeyValueOfstringstring'))
-                    test = manager.find_services_by_path_with_paging(service_search_criteria_list, args.account, search_properties=search_properties)
+                    test = manager.find_services_by_path_with_paging(service_search_criteria_list, account, search_properties=search_properties)
                     if test.itervalues().next() is not None and test.itervalues().next().children() is not None and len(test.itervalues().next().children()) == 1:
                         for k in test.itervalues().next().children():
                             parent_service_for_criteria = AtomiaService()
@@ -282,7 +282,7 @@ def find_service_by_arguments(args, manager):
                         break
         
                 elif count.values()[0] is not None and count.values()[0] != '':
-                    parent_service_for_criteria = manager.get_service_by_id(args.account, str(count.values()[0])) 
+                    parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0])) 
                     parent_service_for_criteria_pretty = AtomiaService()
                     parent_service_for_criteria_pretty.from_simplexml(parent_service_for_criteria.itervalues().next())
                     
@@ -430,17 +430,37 @@ def main(args):
 def entry():
     
     import argparse
+    import textwrap
     
-    parser = argparse.ArgumentParser(description='Atomia Automation Server Manager', prog='atomia')
+    epilog = textwrap.dedent('''
+            Examples
+            ---------------------------------------------------------------------
+            atomia service show --account 101321 --service "4fe9b823-0020-4e33-abd9-a2de6a1480af"
+            atomia service show --account 101321 --path '[{"CsBase" : "d83805a8-c4a3-4e17-96af-4c9f0c1679d2" }, {"CsLinuxWebsite" : "584e20b8-756f-49e4-b426-a58b835a873e"} ]'
+            atomia service list --account 101321 --path '[{"CsBase" : "d83805a8-c4a3-4e17-96af-4c9f0c1679d2" }, {"CsWindowsWebsite" : {"Hostname":"python43.org"} } ]'
+            atomia service find --account 101321 --parent "d83805a8-c4a3-4e17-96af-4c9f0c1679d2" --query '{ "name" : "ApacheWebSite", "path" : "CsLinuxWebsite", "properties" : { "PhpVersion" : "5.2"} }'
+            atomia service find --account 101321 --path '[{"CsBase" : "d83805a8-c4a3-4e17-96af-4c9f0c1679d2"}, {"CsWindowsWebsite" : { "Hostname" : "python44.org"}}]' --query '{ "name" : "DnsZoneRecord", "path" : "DnsZone" }'
+            atomia service add --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
+            atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
+            atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
+            atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
+            
+            Note:
+            In Windows cmd.exe escape the quotes in the following way:
+            atomia service show --account 101321 --path "[{\\"CsBase\\" : \\"d83805a8-c4a3-4e17-96af-4c9f0c1679d2\\" }, {\\"CsLinuxWebsite\\" : \\"584e20b8-756f-49e4-b426-a58b835a873e\\"} ]"
+            ''')
+    
+    parser = argparse.ArgumentParser(description='Atomia Automation Server Manager', prog='atomia', epilog = epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--username', help="The API user's username")
     parser.add_argument('--password', help="The API user's password")
     parser.add_argument('--url',  metavar='API_URL', help="The URL of the Automation Server API's wsdl")
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
     parser.add_argument('--account', help='The account in Automation Server. Required for service *, package *, account show|delete.')
-    parser.add_argument('--service_id', help='The string with logical id of the parent service (add|find service actions) or the given service (show|list|modify|delete service actions)')
+    parser.add_argument('--service', metavar='SERVICE_ID', help='The logical id of the service. Required for service show|list|modify|delete.')
+    parser.add_argument('--parent', metavar='SERVICE_ID', help='The logical id of the parent service. Required for service add. Optional for service find.')
     parser.add_argument('--path', help='Can replace --service or --parent. The JSON representation of the path to the parent service (add|find service actions) or the given service (show|list|modify|delete service actions)')
-    parser.add_argument('--servicedata', metavar='SERVICE_DATA', help='Required argument when using add/modify service; Json representation of the service to be added/modified with possible keys: name(required when adding) and properties(required when adding or modifying')
+    parser.add_argument('--servicedata', metavar='SERVICE_DATA', help='Required argument for service add|modify. Json representation of the service to be added/modified with possible keys: name(required when adding) and properties (required when adding or modifying). For service add you need to fill all required properties (as returned by service template. For service modify, you need to supply only properties that need to be changed.')
     parser.add_argument('--query', help='Required argument when using find service, optional when using list accounts; Json object with possible keys: name, path, properties, page, count')
     parser.add_argument('--accountdata', metavar='ACCOUNT_DATA',help='Required argument when adding account; Json object with possible keys: account_id, account_description, account_properties, provisioning_description')
     
