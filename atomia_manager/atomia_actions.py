@@ -5,9 +5,7 @@ Created on Nov 7, 2011
 '''
 import time
 from pysimplesoap_atomia.client import SoapClient
-from pysimplesoap_atomia.simplexml import SimpleXMLElement
 from datetime import datetime
-import atomia_entities
 import ConfigParser, os
 
 class AtomiaActions(object):
@@ -22,7 +20,7 @@ class AtomiaActions(object):
         if token_expires is None:
             self.expires = datetime.fromtimestamp(time.mktime(time.gmtime()) + 300).strftime('%Y-%m-%dT%H:%M:%SZ')
         else:
-            sefl.expires = token_expires 
+            self.expires = token_expires 
         
         self.username = username
         self.password = password
