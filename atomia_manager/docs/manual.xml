@@ -97,14 +97,14 @@ optional arguments:
       </section>
       <section>
         <title>service</title>
-        <para><emphasis role="italic">service</emphasis> argument specifies the logical_id (GUID) of the  service when invoking the <emphasis role="bold">show service</emphasis>,  <emphasis role="bold">list service</emphasis>, <emphasis role="bold">modify service</emphasis> and <emphasis role="bold">delete service</emphasis> actions. <example>
+        <para><emphasis role="italic">service</emphasis> argument specifies the logical_id (GUID) of the  service when invoking the <emphasis role="bold">show service</emphasis>,<emphasis role="bold">modify service</emphasis> and <emphasis role="bold">delete service</emphasis> actions. <example>
             <title/>
             <programlisting>--service &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot;</programlisting>
           </example></para>
       </section>
       <section>
         <title>parent</title>
-        <para><emphasis role="italic">parent</emphasis> argument specifies the logical_id (GUID) of the parent service when invoking  <emphasis role="bold">add service</emphasis> and <emphasis role="bold">find service</emphasis> actions. <example>
+        <para><emphasis role="italic">parent</emphasis> argument specifies the logical_id (GUID) of the parent service when invoking  <emphasis role="bold">add service</emphasis>, <emphasis role="bold">list service</emphasis> and  <emphasis role="bold">find service</emphasis> actions. <example>
             <title/>
             <programlisting>--parent &quot;fa42f738-6533-4610-b8f5-9fa33aaaced2&quot;</programlisting>
           </example></para>
@@ -252,7 +252,7 @@ optional arguments:
     </section>
     <section>
       <title>List service</title>
-      <para>The <emphasis role="bold">List</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of child services for the given service defined by <emphasis role="italic">service</emphasis> or <emphasis role="italic">path</emphasis> application arguments:<programlisting>atomia service list --account &quot;101321&quot; --service &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot;</programlisting>or <programlisting>atomia service list --account &quot;101321&quot; --path &apos;[{&quot;CsDatabase&quot; : &quot;ac83b69a-61fe-4a9a-ac1b-5eefa9153a22&quot; }, {&quot;CsMySqlDatabase&quot; : &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot; } ]&apos;</programlisting>which results with:<programlisting>[
+      <para>The <emphasis role="bold">List</emphasis> action of the <emphasis role="bold">service</emphasis> entity displays the list of child services for the given service defined by <emphasis role="italic">parent</emphasis> or <emphasis role="italic">path</emphasis> application arguments:<programlisting>atomia service list --account &quot;101321&quot; --parent &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot;</programlisting>or <programlisting>atomia service list --account &quot;101321&quot; --path &apos;[{&quot;CsDatabase&quot; : &quot;ac83b69a-61fe-4a9a-ac1b-5eefa9153a22&quot; }, {&quot;CsMySqlDatabase&quot; : &quot;316c4640-9bef-4c50-ac1c-27e00b24d4e5&quot; } ]&apos;</programlisting>which results with:<programlisting>[
     {
         &quot;status&quot;: &quot;Ok&quot;,
         &quot;logical_id&quot;: &quot;314cc1bc-c1c8-4344-b764-bf11f921a07d&quot;,

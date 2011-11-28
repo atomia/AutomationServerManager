@@ -61,7 +61,7 @@ def service_show(args, manager):
         raise Exception("No service found!")
 
 def service_list(args, manager):
-    current_service = find_service_by_arguments(manager, args.account, args.service, args.path)
+    current_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
     if current_service is not None:
         child_services_result = manager.list_existing_service([current_service.to_xml_friendly_object()], args.account)
     else:
@@ -457,8 +457,8 @@ def entry():
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
     parser.add_argument('--account', help='The account in Automation Server. Required for service *, package *, account show|delete.')
-    parser.add_argument('--service', metavar='SERVICE_ID', help='The logical id of the service. Required for service show|list|modify|delete.')
-    parser.add_argument('--parent', metavar='SERVICE_ID', help='The logical id of the parent service. Required for service add. Optional for service find.')
+    parser.add_argument('--service', metavar='SERVICE_ID', help='The logical id of the service. Required for service show|modify|delete.')
+    parser.add_argument('--parent', metavar='SERVICE_ID', help='The logical id of the parent service. Required for service add. Optional for service list|find.')
     parser.add_argument('--path', help='Can replace --service or --parent. The JSON representation of the path to the parent service (add|find service actions) or the given service (show|list|modify|delete service actions)')
     parser.add_argument('--servicedata', metavar='SERVICE_DATA', help='Required argument for service add|modify. Json representation of the service to be added/modified with possible keys: name(required when adding) and properties (required when adding or modifying). For service add you need to fill all required properties (as returned by service template. For service modify, you need to supply only properties that need to be changed.')
     parser.add_argument('--query', help='Required argument when using find service, optional when using list accounts; Json object with possible keys: name, path, properties, page, count')

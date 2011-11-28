@@ -70,12 +70,12 @@ def test_list_no_service():
     assert isinstance(atomia.main(mock), list)
     
 def test_list_non_existing_service_id():
-    mock = ArgumentsMock(entity="service", action = "list", service = "00000000-0000-0000-0000-000000000000")
+    mock = ArgumentsMock(entity="service", action = "list", parent = "00000000-0000-0000-0000-000000000000")
     with pytest.raises(Exception):
         atomia.main(mock)
         
 def test_list_existing_service_id():
-    mock = ArgumentsMock(entity="service", action = "list", service = "d83805a8-c4a3-4e17-96af-4c9f0c1679d2", account="101321")
+    mock = ArgumentsMock(entity="service", action = "list", parent = "d83805a8-c4a3-4e17-96af-4c9f0c1679d2", account="101321")
     assert isinstance(atomia.main(mock), list) and len(atomia.main(mock)) > 0 
     
 def test_list_non_existing_service_description():
