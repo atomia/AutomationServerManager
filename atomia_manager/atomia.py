@@ -10,6 +10,7 @@ from xml.dom import minidom
 import sys
 import json
 import urllib2
+import jsonpath
 
 
 class InputError(Exception):
@@ -21,7 +22,7 @@ class InputError(Exception):
 
     def __init__(self, msg):
         self.parameter = msg
-        
+
     def __str__(self):
         return repr(self.parameter)
 
@@ -55,7 +56,7 @@ def json_repr(obj):
 def service_show(args, manager):
     service_to_print = find_service_by_arguments(manager, args.account, args.service, args.path)
     if service_to_print is not None:
-        service_to_print.print_me()
+        service_to_print.print_me(True, False, args.filter)
         return service_to_print
     else:
         raise Exception("No service found!")
@@ -75,13 +76,13 @@ def service_list(args, manager):
             child_service = AtomiaService()
             child_service.from_simplexml(j)
             list_result_list.append(child_service.to_print_friendly(False))
-        print json_repr(list_result_list) 
+        print json_repr(list_result_list)
         return list_result_list
     else:
         raise Exception("No child services found for the service with logical id: " + current_service.logical_id)
-    
+
 def service_find(args, manager):
-    
+
     if args.query is not None:
         find_options = json.loads(args.query)
         if isinstance(find_options, dict):
@@ -89,11 +90,11 @@ def service_find(args, manager):
                 service_name = find_options['name']
             else:
                 raise InputError("find_options argument must contain key name")
-            
+
             relative_path = find_options['path'] if find_options.has_key('path') else ''
             result_page = find_options['page'] if find_options.has_key('page') else '0'
             result_count = find_options['count'] if find_options.has_key('count') else '100'
-            
+
             if find_options.has_key('properties'):
                 if isinstance(find_options['properties'], dict):
                     service_properties = find_options['properties']
@@ -105,25 +106,25 @@ def service_find(args, manager):
             raise InputError("Invalid format of query argument.")
     else:
         raise InputError("query is required argument for this action.")
-    
+
     parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
-    
+
     service_search_criteria_list = []
     search_properties = []
     if parent_service is not None:
         tmp_ssc = AtomiaServiceSearchCriteria(service_name, relative_path, parent_service.to_xml_friendly_object('atom:ParentService', 'ParentService'))
     else:
         tmp_ssc = AtomiaServiceSearchCriteria(service_name, relative_path)
-    
+
     service_search_criteria_list.append(tmp_ssc.to_xml_friendly_object('atom:ServiceSearchCriteria', 'ServiceSearchCriteria'))
-    
+
     if service_properties is not None:
         for propk in service_properties:
             tmp_property = AtomiaServiceSearchCriteriaProperty(str(propk), str(service_properties[propk]))
             search_properties.append(tmp_property.to_xml_friendly_object('arr:KeyValueOfstringstring', 'KeyValueOfstringstring'))
-    
+
     find_action_res = manager.find_services_by_path_with_paging(service_search_criteria_list, args.account, search_properties=search_properties, page_number=result_page, page_size = result_count)
-    
+
     if find_action_res.itervalues().next() is not None and find_action_res.itervalues().next().children() is not None:
         find_result_list = []
         for k in find_action_res.itervalues().next().children():
@@ -136,7 +137,7 @@ def service_find(args, manager):
         raise Exception("Could not find service: " + service_name)
 
 def service_add(args, manager):
-    
+
     if args.servicedata is not None:
         service_description = json.loads(args.servicedata)
         if isinstance(service_description, dict):
@@ -144,7 +145,7 @@ def service_add(args, manager):
                 service_name = service_description['name']
             else:
                 raise InputError("service argument must contain key name")
-            
+
             if service_description.has_key('properties'):
                 if isinstance(service_description['properties'], dict):
                     service_properties = service_description['properties']
@@ -156,30 +157,30 @@ def service_add(args, manager):
             raise InputError("Invalid format of find_options argument.")
     else:
         raise InputError("service is required argument for this action.")
-    
+
     parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
-    
+
     if parent_service is not None:
         created_service_result = manager.create_service(service_name, [parent_service.to_xml_friendly_object()], args.account)
     else:
         created_service_result = manager.create_service(service_name, None, args.account)
-    
+
     if created_service_result.has_key("CreateServiceResult") and len(created_service_result["CreateServiceResult"]) == 1:
         for j in created_service_result["CreateServiceResult"]:
             created_service = AtomiaService()
             created_service.from_simplexml(j)
-            
+
             if service_properties is not None and created_service.properties is not None and len(created_service.properties) > 0:
                 for list_count in created_service.properties:
                     if (service_properties.has_key(list_count.name)):
-                        list_count.prop_string_value = service_properties[list_count.name] 
+                        list_count.prop_string_value = service_properties[list_count.name]
 
-            
+
             if parent_service is not None:
                 add_service_result = manager.add_service([created_service.to_xml_friendly_object()], [parent_service.to_xml_friendly_object()], args.account)
             else:
                 add_service_result = manager.add_service([created_service.to_xml_friendly_object()], None, args.account)
-            
+
             if add_service_result.has_key("AddServiceResult") and len(add_service_result["AddServiceResult"]) == 1:
                 for k in add_service_result["AddServiceResult"]:
                     added_service = AtomiaService()
@@ -188,7 +189,7 @@ def service_add(args, manager):
                     return added_service
             else:
                 raise Exception("Could not add service: " + created_service.name)
-            
+
     else:
         raise Exception("Could not create service: " + service_name)
 
@@ -200,10 +201,10 @@ def service_delete(args, manager):
         return True
     else:
         raise Exception("No service found!")
-    
-    
+
+
 def service_modify(args, manager):
-    
+
     if args.servicedata is not None:
         service_description = json.loads(args.servicedata)
         if isinstance(service_description, dict):
@@ -218,13 +219,13 @@ def service_modify(args, manager):
             raise InputError("Invalid format of service argument.")
     else:
         raise InputError("service is required argument for this action.")
-    
+
     current_service = find_service_by_arguments(manager, args.account, args.service, args.path)
     if current_service is None:
         raise Exception("Could not find service to be modified.")
-    
-    
-    
+
+
+
     if current_service.properties is not None and len(current_service.properties) > 0:
         non_existing_props_list = list(set(service_properties.keys())-set(map(lambda x: x.name, current_service.properties)))
         if len(non_existing_props_list) > 0:
@@ -233,9 +234,9 @@ def service_modify(args, manager):
             for list_count in current_service.properties:
                 if (service_properties.has_key(list_count.name)):
                     list_count.prop_string_value = service_properties[list_count.name]
-                
+
         modify_service_result = manager.modify_service([current_service.to_xml_friendly_object()], args.account)
-        
+
         if modify_service_result.has_key("ModifyServiceResult") and len(modify_service_result["ModifyServiceResult"]) == 1:
             for k in modify_service_result["ModifyServiceResult"]:
                 modified_service = AtomiaService()
@@ -244,9 +245,9 @@ def service_modify(args, manager):
                 return modified_service
         else:
             raise Exception("Could not modify service: " + current_service.name)
-                    
+
 def find_service_by_arguments(manager, account, service_id, path):
-    
+
     if service_id is not None:
         show_service_instance = manager.get_service_by_id(account, service_id)
         if show_service_instance.has_key("GetServiceByIdResult") and len(show_service_instance["GetServiceByIdResult"]) == 1:
@@ -254,7 +255,7 @@ def find_service_by_arguments(manager, account, service_id, path):
                 service_to_return = AtomiaService()
                 service_to_return.from_simplexml(k)
                 return service_to_return if service_to_return.logical_id is not None else None
-        
+
     elif path is not None:
         show_service_locator = json.loads(path)
         if len(show_service_locator) > 0:
@@ -267,7 +268,7 @@ def find_service_by_arguments(manager, account, service_id, path):
                         tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '', parent_service_for_criteria.to_xml_friendly_object('atom:ParentService', 'ParentService'))
                     else:
                         tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '')
-                        
+
                     service_search_criteria_list.append(tmp_ssc.to_xml_friendly_object('atom:ServiceSearchCriteria', 'ServiceSearchCriteria'))
                     for propk in count.values()[0]:
                         tmp_property = AtomiaServiceSearchCriteriaProperty(str(propk), str(count.values()[0][propk]))
@@ -280,66 +281,66 @@ def find_service_by_arguments(manager, account, service_id, path):
                     else:
                         parent_service_for_criteria = None
                         break
-        
+
                 elif count.values()[0] is not None and count.values()[0] != '':
-                    parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0])) 
+                    parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0]))
                     parent_service_for_criteria_pretty = AtomiaService()
                     parent_service_for_criteria_pretty.from_simplexml(parent_service_for_criteria.itervalues().next())
-                    
+
                     if parent_service_for_criteria_pretty.logical_id is None:
                         parent_service_for_criteria = None
                     else:
                         parent_service_for_criteria = parent_service_for_criteria_pretty
                 else:
                     raise InputError("Wrong input format of service locator for: " + str(count.keys()[0]))
-                
+
             return parent_service_for_criteria
     else:
         return None
 
 def account_list(args, manager):
-    
+
     result_page = '0'
     result_count = '100'
-    
+
     if args.query is not None:
         find_options = json.loads(args.query)
         if isinstance(find_options, dict):
             if find_options.has_key('page'):
                 result_page = find_options['page']
             if find_options.has_key('count'):
-                result_count = find_options['count'] 
+                result_count = find_options['count']
         else:
             raise InputError("Invalid format of query argument.")
-    
+
     accounts_result = manager.list_accounts(page_number = result_page, page_size = result_count)
-    
+
     if accounts_result.has_key("ListAccountsWithPaginationResult") and len(accounts_result["ListAccountsWithPaginationResult"].children()) > 0:
         list_result_list = []
         for j in accounts_result["ListAccountsWithPaginationResult"].children():
             child_service = AtomiaAccount()
             child_service.from_simplexml(j)
             list_result_list.append(child_service)
-        print json_repr(list_result_list) 
+        print json_repr(list_result_list)
         return list_result_list
     else:
         raise Exception("Could not find any account.")
-    
+
 def account_show(args, manager):
-    
+
     accounts_result = manager.get_account(args.account)
-    
+
     if accounts_result.has_key("GetAccountResult") and len(accounts_result["GetAccountResult"].children()) > 0:
         account_result = AtomiaAccount()
         account_result.from_simplexml(accounts_result["GetAccountResult"])
         account_result.print_me()
         return account_result
     else:
-        raise Exception("Could not find any account with number " + args.account)    
+        raise Exception("Could not find any account with number " + args.account)
 
 
 def account_add(args, manager):
-    
+
     if args.accountdata is not None:
         account_data = json.loads(args.accountdata)
         if isinstance(account_data, dict):
@@ -347,17 +348,17 @@ def account_add(args, manager):
                 account_id = account_data['account_id']
             else:
                 raise InputError("account argument must contain key account_id")
-            
+
             if account_data.has_key('account_description'):
                 account_description = account_data['account_description']
             else:
                 account_description = None
-                
+
             if account_data.has_key('provisioning_description'):
                 provisioning_description = account_data['provisioning_description']
             else:
                 provisioning_description = None
-            
+
             if account_data.has_key('account_properties'):
                 if isinstance(account_data['account_properties'], dict):
                     account_properties = account_data['account_properties']
@@ -369,13 +370,13 @@ def account_add(args, manager):
             raise InputError("Invalid format of account argument.")
     else:
         raise InputError("Account is required argument for this action.")
-    
+
     account_to_create = AtomiaAccount(account_id = account_id, account_description = account_description, account_properties = account_properties, provisioning_description = provisioning_description)
-    
+
     manager.add_account([account_to_create.to_xml_friendly_object()])
-    
+
     accounts_result = manager.get_account(account_id)
-    
+
     if accounts_result.has_key("GetAccountResult") and len(accounts_result["GetAccountResult"].children()) > 0:
         account_result = AtomiaAccount()
         account_result.from_simplexml(accounts_result["GetAccountResult"])
@@ -383,7 +384,7 @@ def account_add(args, manager):
         return account_result
     else:
         raise Exception("Could not find any account with number " + account_id)
-    
+
 def account_delete(args, manager):
 
     manager.delete_account(args.account)
@@ -422,16 +423,16 @@ def main(args):
         elif args.action == 'delete':
             if args.account is None:
                 raise InputError("Account number is required argument for this action.")
-            else: 
+            else:
                 return account_delete(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
-    
+
 def entry():
-    
+
     import argparse
     import textwrap
-    
+
     epilog = textwrap.dedent('''
             Examples
             ---------------------------------------------------------------------
@@ -444,12 +445,12 @@ def entry():
             atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
             atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
             atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
-            
+
             Note:
             In Windows cmd.exe escape the quotes in the following way:
             atomia service show --account 101321 --path "[{\\"CsBase\\" : \\"d83805a8-c4a3-4e17-96af-4c9f0c1679d2\\" }, {\\"CsLinuxWebsite\\" : \\"584e20b8-756f-49e4-b426-a58b835a873e\\"} ]"
             ''')
-    
+
     parser = argparse.ArgumentParser(description='Atomia Automation Server Manager', prog='atomia', epilog = epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--username', help="The API user's username")
     parser.add_argument('--password', help="The API user's password")
@@ -463,18 +464,22 @@ def entry():
     parser.add_argument('--servicedata', metavar='SERVICE_DATA', help='Required argument for service add|modify. Json representation of the service to be added/modified with possible keys: name(required when adding) and properties (required when adding or modifying). For service add you need to fill all required properties (as returned by service template. For service modify, you need to supply only properties that need to be changed.')
     parser.add_argument('--query', help='Required argument when using find service, optional when using list accounts; Json object with possible keys: name, path, properties, page, count')
     parser.add_argument('--accountdata', metavar='ACCOUNT_DATA',help='Required argument when adding account; Json object with possible keys: account_id, account_description, account_properties, provisioning_description')
-    
+
+    ''' changes by Vukasin '''
+    parser.add_argument('--filter', help="Filter result by using JSON paths.")
+    ''' changes by Vukasin '''
+
     args = parser.parse_args()
-    
+
     try:
         main(args)
     except InputError, (instance):
         print instance.parameter
-        sys.exit()     
+        sys.exit()
     except urllib2.HTTPError, error:
         dom = minidom.parseString(error.read())
         print "Api returned an error: \n", dom.toprettyxml()
         sys.exit()
 
 if __name__=="__main__":
-    entry()   
+    entry()
