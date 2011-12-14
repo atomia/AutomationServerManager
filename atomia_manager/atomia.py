@@ -260,36 +260,39 @@ def find_service_by_arguments(manager, account, service_id, path):
         if len(show_service_locator) > 0:
             parent_service_for_criteria = None
             for count in show_service_locator:
-                if isinstance(count.values()[0], dict):
+                if isinstance(count.values()[0], dict) or count.values()[0] == '':
                     service_search_criteria_list = []
                     search_properties = []
                     if parent_service_for_criteria is not None:
                         tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '', parent_service_for_criteria.to_xml_friendly_object('atom:ParentService', 'ParentService'))
                     else:
                         tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '')
-
+                        
                     service_search_criteria_list.append(tmp_ssc.to_xml_friendly_object('atom:ServiceSearchCriteria', 'ServiceSearchCriteria'))
-                    for propk in count.values()[0]:
-                        tmp_property = AtomiaServiceSearchCriteriaProperty(str(propk), str(count.values()[0][propk]))
-                        search_properties.append(tmp_property.to_xml_friendly_object('arr:KeyValueOfstringstring', 'KeyValueOfstringstring'))
+                    if isinstance(count.values()[0], dict):
+                        for propk in count.values()[0]:
+                            tmp_property = AtomiaServiceSearchCriteriaProperty(str(propk), str(count.values()[0][propk]))
+                            search_properties.append(tmp_property.to_xml_friendly_object('arr:KeyValueOfstringstring', 'KeyValueOfstringstring'))
                     test = manager.find_services_by_path_with_paging(service_search_criteria_list, account, search_properties=search_properties)
-                    if test.itervalues().next() is not None and test.itervalues().next().children() is not None and len(test.itervalues().next().children()) == 1:
+                    if test.itervalues().next() is not None and test.itervalues().next().children() is not None and len(test.itervalues().next().children()) > 0:
                         for k in test.itervalues().next().children():
                             parent_service_for_criteria = AtomiaService()
                             parent_service_for_criteria.from_simplexml(k)
+                            break
                     else:
                         parent_service_for_criteria = None
                         break
-
-                elif count.values()[0] is not None and count.values()[0] != '':
-                    parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0]))
+        
+                elif count.values()[0] is not None:
+                    parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0])) 
                     parent_service_for_criteria_pretty = AtomiaService()
                     parent_service_for_criteria_pretty.from_simplexml(parent_service_for_criteria.itervalues().next())
-
+                    
                     if parent_service_for_criteria_pretty.logical_id is None:
                         parent_service_for_criteria = None
                     else:
                         parent_service_for_criteria = parent_service_for_criteria_pretty
+
                 else:
                     raise InputError("Wrong input format of service locator for: " + str(count.keys()[0]))
 

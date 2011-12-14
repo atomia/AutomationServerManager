@@ -36,27 +36,36 @@ class AtomiaActions(object):
                     self.password = config.get("Automation Server API", "password")
                 if self.api_url is None:
                     self.api_url = config.get("Automation Server API", "url")
+                
+                self.bootstrap = config.has_option("Automation Server API", "bootstrap") and config.getboolean("Automation Server API", "bootstrap")
             else:
                 raise Exception("Could not find the config file!")
         
         if soap_header is None:
-
-            self.header = """<soap:Header xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" 
+            
+            if self.bootstrap:
+                self.header = """<soap:Header xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" 
                             xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
-                <wsse:Security soap:mustUnderstand="1">
-                    <wsu:Timestamp wsu:Id="_0">
-                        <wsu:Created>%(Created)s</wsu:Created>
-                        <wsu:Expires>%(Expires)s</wsu:Expires>
-                    </wsu:Timestamp>
-                    <wsse:UsernameToken wsu:Id="uuid-8a45f51b-fe46-4715-bdae-e596c36ad6be-1">
-                      <wsse:Username>%(Username)s</wsse:Username>
-                      <wsse:Password
-                        Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
-                         %(Password)s
-                      </wsse:Password>
-                   </wsse:UsernameToken>
-                </wsse:Security>
             </soap:Header>"""
+            
+            else:
+
+                self.header = """<soap:Header xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" 
+                                xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                    <wsse:Security soap:mustUnderstand="1">
+                        <wsu:Timestamp wsu:Id="_0">
+                            <wsu:Created>%(Created)s</wsu:Created>
+                            <wsu:Expires>%(Expires)s</wsu:Expires>
+                        </wsu:Timestamp>
+                        <wsse:UsernameToken wsu:Id="uuid-8a45f51b-fe46-4715-bdae-e596c36ad6be-1">
+                          <wsse:Username>%(Username)s</wsse:Username>
+                          <wsse:Password
+                            Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">
+                             %(Password)s
+                          </wsse:Password>
+                       </wsse:UsernameToken>
+                    </wsse:Security>
+                </soap:Header>"""
             
             self.header = self.header % dict(Created=self.created, Expires=self.expires, Username = self.username, Password = self.password)
         else:
