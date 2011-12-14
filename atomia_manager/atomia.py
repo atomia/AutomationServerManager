@@ -10,7 +10,6 @@ from xml.dom import minidom
 import sys
 import json
 import urllib2
-import jsonpath
 
 
 class InputError(Exception):
