@@ -37,3 +37,4 @@ TestResults
 dist/
 build/
 *.pyc
+*.msi
