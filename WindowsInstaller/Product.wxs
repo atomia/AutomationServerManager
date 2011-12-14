@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="Atomia Automation Server Cmd Client" Language="1033" Version="$(var.Version)" Manufacturer="Atomia AB" UpgradeCode="fd207a75-a7d3-46a1-b88d-476e11aea139">
+		<Package InstallerVersion="300" Compressed="yes" />
+    
+		<Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
+
+    <MajorUpgrade DowngradeErrorMessage="Higher Version already installed." Schedule="afterInstallInitialize" AllowSameVersionUpgrades="no"/>
+
+    <Icon Id="icon.ico" SourceFile="icon.ico"/>
+    
+    <DirectoryRef Id="ProgramFilesFolder">
+      <Directory Id="GENERALLOCATION" Name="Atomia">
+        <Directory Id="FProduct" Name="AutomationServerCmdClient">
+          <Component Id="CAtomiaExe" Guid="{AF4BF955-C5A4-466C-8C2D-5C844FDE30B8}">
+            <File Source="..\dist\atomia.exe" Name="atomia.exe"/>
+          </Component>
+          <Component Id="CPythonLib" Guid="{04257DA5-2BF0-4683-B9BE-0A096D6E422D}">
+            <File Source="..\dist\python26.dll"/>
+          </Component>
+          <Component Id="CStartupBat" Guid="{5BCAAEC9-DC97-47EE-9C4F-58DF8CFC99D5}">
+            
+            <File Source="AutomationServerCmdClient.bat">
+              <Shortcut Id="DestkopShortcut" WorkingDirectory="FProduct" Directory="DesktopFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
+              <Shortcut Id="StartMenuShortcut" WorkingDirectory="FProduct" Directory="ProgramMenuFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
+            </File>
+          </Component>
+          <Component Id="CConf" Guid="{8C6011AE-E833-42CC-A073-34F777B5B4CB}">
+            <File Source="..\atomia_manager\atomia.conf.dist"/>
+          </Component>
+
+          <Component Id="CAutomationServiceCmdClient" Guid="{DB6D8B39-A1BD-4C95-B19F-5695BCA003B3}">
+            <RegistryKey Action="create" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\atomia.exe">
+              <RegistryValue Type="string" Value="[FProduct]atomia.exe" KeyPath="yes" />
+              <RegistryValue Type="string" Value="[FProduct]" Name="Path" />
+            </RegistryKey>
+          </Component>
+        </Directory>
+      </Directory>
+      <Directory Id="DesktopFolder"/>
+      <Directory Id="ProgramMenuFolder"/>
+      <Merge Id="VCCfiles" SourceFile="Microsoft_VC90_CRT_x86.msm" Language="1033" DiskId="1"/>
+    </DirectoryRef>
+    
+
+		<Feature Id="ProductFeature" Title="AutomationServerCmdClient" Level="1">
+      <MergeRef Id="VCCfiles"/>
+
+      <ComponentRef Id="CAtomiaExe"/>
+      <ComponentRef Id="CPythonLib"/>
+      <ComponentRef Id="CStartupBat"/>
+      <ComponentRef Id="CConf"/>
+      <ComponentRef Id="CAutomationServiceCmdClient"/>
+
+      <ComponentGroupRef Id="pyd"/>
+      
+			<ComponentGroupRef Id="Product.Generated" />
+		</Feature>
+	</Product>
+</Wix>

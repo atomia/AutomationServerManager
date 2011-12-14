@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name = "atomia_manager",
-    version = "0.0.1",
+    version = read('version.txt'),
     author = "Atomia",
     author_email = "dusan@atomia.com",
     description = ("Command-line app for Atomia Automation Server management."),

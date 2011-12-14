@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.5</ProductVersion>
+    <ProjectGuid>{8b6af29e-36f8-4e4a-9697-dbbef375fab9}</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>AutomationServerCmdClient</OutputName>
+    <OutputType>Package</OutputType>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Atomia.WiX.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Atomia.WiX.targets</WixTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VersionAssembly>..\dist\atomia.exe</VersionAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AutomationServerCmdClient.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <HarvestDirectory Include="..\dist\">
+      <ComponentGroupName>pyd</ComponentGroupName>
+      <DirectoryRefId>FProduct</DirectoryRefId>
+      <SuppressCom>True</SuppressCom>
+      <SuppressRegistry>True</SuppressRegistry>
+      <Filter>.*\.pyd$</Filter>
+      <KeepEmptyDirectories>false</KeepEmptyDirectories>
+    </HarvestDirectory>
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+  <Target Name="BeforeBuild">
+    <!-- Read the version information from the assembly -->
+    <ReadLinesFromFile File="..\version.txt">
+      <Output TaskParameter="Lines" PropertyName="FileContents" />
+    </ReadLinesFromFile>
+    <!-- Set traget name property to include version -->
+    <CreateProperty Value="$(OutputName)-$(FileContents)">
+      <Output TaskParameter="Value" PropertyName="TargetName" />
+    </CreateProperty>
+    <!-- Also need to change TargetFileName and TargetPath -->
+    <CreateProperty Value="$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Value" PropertyName="TargetFileName" />
+    </CreateProperty>
+    <CreateProperty Value="$(TargetDir)$(TargetFileName)">
+      <Output TaskParameter="Value" PropertyName="TargetPath" />
+    </CreateProperty>
+    <!-- Finally define a constant that can be used in the WiX document to refer to this version -->
+    <CreateProperty Value="$(DefineConstans);Version=$(FileContents)">
+      <Output TaskParameter="Value" PropertyName="DefineConstants" />
+    </CreateProperty>
+  </Target>
+</Project>
