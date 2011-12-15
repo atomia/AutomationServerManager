@@ -94,6 +94,18 @@ class AtomiaActions(object):
         
         return self.client.DeleteAccount( accountId = account_number )
         
+    def list_packages(self, account_number):
+        
+        return self.client.ListPackagesForAccount( accountName = account_number )
+    
+    def add_package(self, account_number, package, arguments = None):
+        
+        return self.client.AddPackageForAccount( accountName = account_number, package = package, arguments = arguments )
+    
+    def delete_package(self, account_number, package):
+        
+        return self.client.DeletePackageForAccount( accountName = account_number, package = package )
+    
     def create_service(self, service_name, parent_service, account_number):
 
         return self.client.CreateService(
