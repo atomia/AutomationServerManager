@@ -38,6 +38,14 @@
       <Filter>.*\.pyd$</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
     </HarvestDirectory>
+    <HarvestDirectory Include="..\shell\">
+      <ComponentGroupName>shell</ComponentGroupName>
+      <DirectoryRefId>FShell</DirectoryRefId>
+      <SuppressCom>True</SuppressCom>
+      <SuppressRegistry>True</SuppressRegistry>
+      <Filter>.*</Filter>
+      <KeepEmptyDirectories>false</KeepEmptyDirectories>
+    </HarvestDirectory>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">
