@@ -35,6 +35,8 @@
               <RegistryValue Type="string" Value="[FProduct]" Name="Path" />
             </RegistryKey>
           </Component>
+
+          <Directory Id="FShell" Name="Shell"/>
         </Directory>
       </Directory>
       <Directory Id="DesktopFolder"/>
@@ -53,6 +55,7 @@
       <ComponentRef Id="CAutomationServiceCmdClient"/>
 
       <ComponentGroupRef Id="pyd"/>
+      <ComponentGroupRef Id="shell"/>
       
 			<ComponentGroupRef Id="Product.Generated" />
 		</Feature>
