@@ -23,3 +23,6 @@ Post-installation:
 
 * Rename atomia.conf.dist file to atomia.conf and put it in the /etc (for Linux) or leave it where it is (for Linux/Windows)
 * Update the atomia.conf file with valid username, password and api_url
+
+This product includes binaries covered by the GPLv3, downloaded from the following location:
+http://cygwin.com/

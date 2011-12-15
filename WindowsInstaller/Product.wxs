@@ -18,8 +18,10 @@
           <Component Id="CPythonLib" Guid="{04257DA5-2BF0-4683-B9BE-0A096D6E422D}">
             <File Source="..\dist\python26.dll"/>
           </Component>
+          <Component Id="CLicense" Guid="{D18127AB-83A4-4979-8E8F-3C58294A4D3A}">
+            <File Source="..\license.txt"/>
+          </Component>
           <Component Id="CStartupBat" Guid="{5BCAAEC9-DC97-47EE-9C4F-58DF8CFC99D5}">
-            
             <File Source="AutomationServerCmdClient.bat">
               <Shortcut Id="DestkopShortcut" WorkingDirectory="FProduct" Directory="DesktopFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
               <Shortcut Id="StartMenuShortcut" WorkingDirectory="FProduct" Directory="ProgramMenuFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
@@ -53,6 +55,7 @@
       <ComponentRef Id="CStartupBat"/>
       <ComponentRef Id="CConf"/>
       <ComponentRef Id="CAutomationServiceCmdClient"/>
+      <ComponentRef Id="CLicense"/>
 
       <ComponentGroupRef Id="pyd"/>
       <ComponentGroupRef Id="shell"/>
