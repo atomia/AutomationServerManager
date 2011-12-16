@@ -25,7 +25,7 @@ class AtomiaActions(object):
         self.username = username
         self.password = password
         self.api_url = api_url
-		self.bootstrap = False
+        self.bootstrap = False
         
         if self.username is None or self.password is None or self.api_url is None:
             config = ConfigParser.ConfigParser()
