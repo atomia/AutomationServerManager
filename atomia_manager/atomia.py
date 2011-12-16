@@ -55,7 +55,7 @@ def json_repr(obj):
 def service_show(args, manager):
     service_to_print = find_service_by_arguments(manager, args.account, args.service, args.path)
     if service_to_print is not None:
-        service_to_print.print_me(True, False, args.filter)
+        service_to_print.print_me(args.filter, args.first, True, False,)
         return service_to_print
     else:
         raise Exception("No service found!")
@@ -75,7 +75,19 @@ def service_list(args, manager):
             child_service = AtomiaService()
             child_service.from_simplexml(j)
             list_result_list.append(child_service.to_print_friendly(False))
-        print json_repr(list_result_list)
+        
+        result = json_repr(list_result_list)
+        
+        ''' filter results '''
+        if args.filter is not None:
+            import jsonpath
+            result = jsonpath.jsonpath(json.loads(result), args.filter)
+            
+            if result:
+                if args.first is True:
+                    result = result[0]
+                    
+        print json_repr(result)
         return list_result_list
     else:
         raise Exception("No child services found for the service with logical id: " + current_service.logical_id)
@@ -130,7 +142,19 @@ def service_find(args, manager):
             find_action_result = AtomiaService()
             find_action_result.from_simplexml(k)
             find_result_list.append(find_action_result.to_print_friendly(False, True))
-        print json_repr(find_result_list)
+        
+        result = json_repr(find_result_list)
+        
+        ''' filter results '''
+        if args.filter is not None:
+            import jsonpath
+            result = jsonpath.jsonpath(json.loads(result), args.filter)
+            
+            if result:
+                if args.first is True:
+                    result = result[0]
+                    
+        print json_repr(result)
         return find_result_list
     else:
         raise Exception("Could not find service: " + service_name)
@@ -429,6 +453,10 @@ def main(args):
                 return account_delete(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
+        
+def str2bool(str):
+  return str.lower() in ("true", "1")
+
 
 def entry():
 
@@ -469,10 +497,16 @@ def entry():
 
     ''' changes by Vukasin '''
     parser.add_argument('--filter', help="Filter result by using JSON paths.")
+    parser.add_argument('--first', help="Show only first filtered result.")
     ''' changes by Vukasin '''
 
     args = parser.parse_args()
-
+    
+    if args.first is not None:
+        args.first = str2bool(args.first)
+    else:
+        args.first = False;
+        
     try:
         main(args)
     except InputError, (instance):

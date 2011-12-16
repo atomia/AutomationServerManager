@@ -200,6 +200,7 @@ class AtomiaService(object):
         self.properties = properties
         self.provisioning_description = provisioning_description
         self.parent = parent
+        self.simple_properties = {}
         return
 
     def to_xml_friendly_object(self, xml_tag_with_namespace = None, xml_tag = None):
@@ -341,7 +342,7 @@ class AtomiaService(object):
                 del tmp_dict['parent']
             return copied
 
-    def print_me(self, display_parent = True, display_parent_id = False, filter = None):
+    def print_me(self, resultFilter = None, showFirstResult = False, display_parent = True, display_parent_id = False):
         import json
         if display_parent:
             result = json.dumps(self, default=encode_me, indent=4)
@@ -350,11 +351,16 @@ class AtomiaService(object):
         else:
             result = json.dumps(self, default=encode_me_without_parent, indent=4)
 
+        ''' filter results if needed'''
         if filter is not None:
             import jsonpath
-            jsonpath.jsonpath(result, filter)
+            result = jsonpath.jsonpath(json.loads(result), resultFilter)
+            
+            if result:
+                if showFirstResult is True:
+                    result = result[0]
 
-        print result
+        print json.dumps(result);
 
     def initialize_properties(self, k):
         for b in k.children():
@@ -383,6 +389,7 @@ class AtomiaService(object):
                     for j in b.children():
                         tmp_property = AtomiaServiceProperty()
                         tmp_property.from_simplexml(j)
+                        self.simple_properties[tmp_property.name] = tmp_property.prop_string_value
                         self.properties.append(tmp_property)
             elif local_name == 'Parent':
                 tmp_property = AtomiaService()
