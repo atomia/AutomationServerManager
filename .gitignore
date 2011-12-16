@@ -38,3 +38,5 @@ dist/
 build/
 *.pyc
 *.msi
+*.egg-info/
+/testparams.txt

@@ -1,5 +1,5 @@
 [Automation Server API]
 username=atomia_username
 password=atomia_password
-url=http://provisioning.int.atomia.com/CoreAPI.svc?wsdl
-bootstrap=true
+url=https://example.com/CoreAPIBasicAuth.svc?wsdl
+bootstrap=false
