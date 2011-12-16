@@ -15,9 +15,6 @@
           <Component Id="CAtomiaExe" Guid="{AF4BF955-C5A4-466C-8C2D-5C844FDE30B8}">
             <File Source="..\dist\atomia.exe" Name="atomia.exe"/>
           </Component>
-          <Component Id="CPythonLib" Guid="{04257DA5-2BF0-4683-B9BE-0A096D6E422D}">
-            <File Source="..\dist\python26.dll"/>
-          </Component>
           <Component Id="CLicense" Guid="{D18127AB-83A4-4979-8E8F-3C58294A4D3A}">
             <File Source="..\license.txt"/>
           </Component>
@@ -51,7 +48,6 @@
       <MergeRef Id="VCCfiles"/>
 
       <ComponentRef Id="CAtomiaExe"/>
-      <ComponentRef Id="CPythonLib"/>
       <ComponentRef Id="CStartupBat"/>
       <ComponentRef Id="CConf"/>
       <ComponentRef Id="CAutomationServiceCmdClient"/>

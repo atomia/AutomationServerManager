@@ -351,7 +351,7 @@ class AtomiaPackageExtension(object):
 
 class AtomiaService(object):
     def __init__(self, account_owner_id = None, current_request_id = None, status = None, disabled = None, 
-              friendly_name = None, logical_id = None, name = None, physical_id = None, properties = None, provisioning_description = None, parent = None):
+              friendly_name = None, logical_id = None, name = None, physical_id = None, properties = None, provisioning_description = None, parent = None, show_simple_props = False):
         self.logical_id = logical_id
         self.account_owner_id = account_owner_id
         self.physical_id = physical_id
@@ -363,7 +363,11 @@ class AtomiaService(object):
         self.properties = properties
         self.provisioning_description = provisioning_description
         self.parent = parent
-        self.simple_properties = {}
+        
+        if show_simple_props:
+            self.simple_properties = {}
+        else:
+            self.simple_properties = None
         return
     
     def to_xml_friendly_object(self, xml_tag_with_namespace = None, xml_tag = None):
@@ -513,17 +517,19 @@ class AtomiaService(object):
             result = json.dumps(self, default=encode_me_with_parent_id, indent=4)
         else:
             result = json.dumps(self, default=encode_me_without_parent, indent=4)
-
+        
         ''' filter results if needed'''
-        if filter is not None:
+        if resultFilter is not None:
             import jsonpath
             result = jsonpath.jsonpath(json.loads(result), resultFilter)
             
             if result:
                 if showFirstResult is True:
                     result = result[0]
-
-        print json.dumps(result);
+                    
+            print json.dumps(result, default=encode_me, indent=4)
+        else:
+            print result
     
     def initialize_properties(self, k):
         for b in k.children():
@@ -552,7 +558,8 @@ class AtomiaService(object):
                     for j in b.children():
                         tmp_property = AtomiaServiceProperty()
                         tmp_property.from_simplexml(j)
-                        self.simple_properties[tmp_property.name] = tmp_property.prop_string_value
+                        if self.simple_properties is not None:
+                            self.simple_properties[tmp_property.name] = tmp_property.prop_string_value
                         self.properties.append(tmp_property)
             elif local_name == 'Parent':
                 tmp_property = AtomiaService()

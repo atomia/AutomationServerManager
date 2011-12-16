@@ -35,7 +35,7 @@
       <DirectoryRefId>FProduct</DirectoryRefId>
       <SuppressCom>True</SuppressCom>
       <SuppressRegistry>True</SuppressRegistry>
-      <Filter>.*\.pyd$</Filter>
+      <Filter>.*\.pyd$|.*\.dll$</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
     </HarvestDirectory>
     <HarvestDirectory Include="..\shell\">

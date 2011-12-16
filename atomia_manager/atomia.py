@@ -69,8 +69,9 @@ def service_list(args, manager):
             raise Exception("Could not find the parent service.")
         else:
             child_services_result = manager.list_existing_service(None, args.account)
-    if child_services_result.has_key("ListExistingServicesResult") and len(child_services_result["ListExistingServicesResult"].children()) > 0:
-        list_result_list = []
+            
+    list_result_list = []
+    if child_services_result.has_key("ListExistingServicesResult") and child_services_result["ListExistingServicesResult"].children() is not None and len(child_services_result["ListExistingServicesResult"].children()) > 0:
         for j in child_services_result["ListExistingServicesResult"].children():
             child_service = AtomiaService()
             child_service.from_simplexml(j)
@@ -88,9 +89,9 @@ def service_list(args, manager):
                     result = result[0]
                     
         print json_repr(result)
-        return list_result_list
-    else:
-        raise Exception("No child services found for the service with logical id: " + current_service.logical_id)
+    ''' else:
+         raise Exception("No child services found for the service with logical id: " + current_service.logical_id) '''
+    return list_result_list
     
 def service_find(args, manager):
     
@@ -136,8 +137,9 @@ def service_find(args, manager):
     
     find_action_res = manager.find_services_by_path_with_paging(service_search_criteria_list, args.account, search_properties=search_properties, page_number=result_page, page_size = result_count)
     
+    find_result_list = []
     if find_action_res.itervalues().next() is not None and find_action_res.itervalues().next().children() is not None:
-        find_result_list = []
+        
         for k in find_action_res.itervalues().next().children():
             find_action_result = AtomiaService()
             find_action_result.from_simplexml(k)
@@ -155,9 +157,9 @@ def service_find(args, manager):
                     result = result[0]
                     
         print json_repr(result)
-        return find_result_list
-    else:
-        raise Exception("Could not find service: " + service_name)
+    ''' else:
+        raise Exception("Could not find service: " + service_name) '''
+    return find_result_list
 
 def service_add(args, manager):
     
@@ -535,7 +537,6 @@ def main(args):
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
         
-    
         
 def str2bool(str):
   return str.lower() in ("true", "1")
@@ -585,6 +586,7 @@ def entry():
     ''' changes by Vukasin '''
     parser.add_argument('--filter', help="Filter result by using JSON paths.")
     parser.add_argument('--first', help="Show only first filtered result.")
+    parser.add_argument('--simpleProps', help="Fill simple property structure, used for JSON paths.")
     ''' changes by Vukasin '''
     
     args = parser.parse_args()
@@ -593,6 +595,11 @@ def entry():
         args.first = str2bool(args.first)
     else:
         args.first = False;
+        
+    if args.simpleProps is not None:
+        args.simpleProps = str2bool(args.simpleProps)
+    else:
+        args.simpleProps = False;
         
     try:
         main(args)
