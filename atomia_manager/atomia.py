@@ -53,7 +53,7 @@ def json_repr(obj):
     return json.dumps(serialize(obj), indent = 4)
 
 def service_show(args, manager):
-    service_to_print = find_service_by_arguments(manager, args.account, args.service, args.path)
+    service_to_print = find_service_by_arguments(manager, args.account, args.service, args.path, args.simpleProps)
     if service_to_print is not None:
         service_to_print.print_me(args.filter, args.first, True, False,)
         return service_to_print
@@ -61,7 +61,7 @@ def service_show(args, manager):
         raise Exception("No service found!")
 
 def service_list(args, manager):
-    current_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
+    current_service = find_service_by_arguments(manager, args.account, args.parent, args.path, args.simpleProps)
     if current_service is not None:
         child_services_result = manager.list_existing_service([current_service.to_xml_friendly_object()], args.account)
     else:
@@ -73,7 +73,7 @@ def service_list(args, manager):
     list_result_list = []
     if child_services_result.has_key("ListExistingServicesResult") and child_services_result["ListExistingServicesResult"].children() is not None and len(child_services_result["ListExistingServicesResult"].children()) > 0:
         for j in child_services_result["ListExistingServicesResult"].children():
-            child_service = AtomiaService()
+            child_service = AtomiaService(show_simple_props = args.simpleProps)
             child_service.from_simplexml(j)
             list_result_list.append(child_service.to_print_friendly(False))
         
@@ -119,7 +119,7 @@ def service_find(args, manager):
     else:
         raise InputError("query is required argument for this action.")
     
-    parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path)
+    parent_service = find_service_by_arguments(manager, args.account, args.parent, args.path, args.simpleProps)
     
     service_search_criteria_list = []
     search_properties = []
@@ -141,7 +141,7 @@ def service_find(args, manager):
     if find_action_res.itervalues().next() is not None and find_action_res.itervalues().next().children() is not None:
         
         for k in find_action_res.itervalues().next().children():
-            find_action_result = AtomiaService()
+            find_action_result = AtomiaService(show_simple_props = args.simpleProps)
             find_action_result.from_simplexml(k)
             find_result_list.append(find_action_result.to_print_friendly(False, True))
         
@@ -271,13 +271,13 @@ def service_modify(args, manager):
         else:
             raise Exception("Could not modify service: " + current_service.name)
                     
-def find_service_by_arguments(manager, account, service_id, path):
+def find_service_by_arguments(manager, account, service_id, path, show_simple_props = False):
     
     if service_id is not None:
         show_service_instance = manager.get_service_by_id(account, service_id)
         if show_service_instance.has_key("GetServiceByIdResult") and len(show_service_instance["GetServiceByIdResult"]) == 1:
             for k in show_service_instance["GetServiceByIdResult"]:
-                service_to_return = AtomiaService()
+                service_to_return = AtomiaService(show_simple_props = show_simple_props)
                 service_to_return.from_simplexml(k)
                 return service_to_return if service_to_return.logical_id is not None else None
         
@@ -302,7 +302,7 @@ def find_service_by_arguments(manager, account, service_id, path):
                     test = manager.find_services_by_path_with_paging(service_search_criteria_list, account, search_properties=search_properties)
                     if test.itervalues().next() is not None and test.itervalues().next().children() is not None and len(test.itervalues().next().children()) > 0:
                         for k in test.itervalues().next().children():
-                            parent_service_for_criteria = AtomiaService()
+                            parent_service_for_criteria = AtomiaService(show_simple_props = show_simple_props)
                             parent_service_for_criteria.from_simplexml(k)
                             break
                     else:
@@ -311,7 +311,7 @@ def find_service_by_arguments(manager, account, service_id, path):
         
                 elif count.values()[0] is not None:
                     parent_service_for_criteria = manager.get_service_by_id(account, str(count.values()[0])) 
-                    parent_service_for_criteria_pretty = AtomiaService()
+                    parent_service_for_criteria_pretty = AtomiaService(show_simple_props = show_simple_props)
                     parent_service_for_criteria_pretty.from_simplexml(parent_service_for_criteria.itervalues().next())
                     
                     if parent_service_for_criteria_pretty.logical_id is None:
