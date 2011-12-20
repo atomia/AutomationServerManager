@@ -210,7 +210,7 @@ def service_add(args, manager):
                 for k in add_service_result["AddServiceResult"]:
                     added_service = AtomiaService()
                     added_service.from_simplexml(k)
-                    added_service.print_me(False, True)
+                    added_service.print_me(args.filter, args.first, False, True)
                     return added_service
             else:
                 raise Exception("Could not add service: " + created_service.name)
@@ -605,11 +605,11 @@ def entry():
         main(args)
     except InputError, (instance):
         print instance.parameter
-        sys.exit()     
+        sys.exit(1)     
     except urllib2.HTTPError, error:
         dom = minidom.parseString(error.read())
         print "Api returned an error: \n", dom.toprettyxml()
-        sys.exit()
+        sys.exit(2)
 
 if __name__=="__main__":
     entry()   
