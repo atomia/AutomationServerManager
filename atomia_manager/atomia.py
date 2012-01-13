@@ -198,7 +198,10 @@ def service_add(args, manager):
             if service_properties is not None and created_service.properties is not None and len(created_service.properties) > 0:
                 for list_count in created_service.properties:
                     if (service_properties.has_key(list_count.name)):
-                        list_count.prop_string_value = service_properties[list_count.name] 
+                        if (service_properties[list_count.name] == 'null' or service_properties[list_count.name] == 'NULL'):
+                            list_count.prop_string_value = None
+                        else:
+                            list_count.prop_string_value = service_properties[list_count.name] 
 
             
             if parent_service is not None:
