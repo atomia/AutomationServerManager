@@ -87,8 +87,10 @@ def service_list(args, manager):
             if result:
                 if args.first is True:
                     result = result[0]
-                    
-        print json_repr(result)
+            
+            print json_repr(result)
+        else:
+            print result
     ''' else:
          raise Exception("No child services found for the service with logical id: " + current_service.logical_id) '''
     return list_result_list
