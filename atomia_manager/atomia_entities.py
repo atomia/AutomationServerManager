@@ -523,11 +523,14 @@ class AtomiaService(object):
             import jsonpath
             result = jsonpath.jsonpath(json.loads(result), resultFilter)
             
-            if result:
-                if showFirstResult is True:
+            if showFirstResult is True:
+                if result:
                     result = result[0]
-                    
-            print json.dumps(result, default=encode_me, indent=4)
+                    print json.dumps(result, default=encode_me, indent=4).strip('"')
+                else:
+                    print ""
+            else: 
+                print json.dumps(result, default=encode_me, indent=4)
         else:
             print result
     

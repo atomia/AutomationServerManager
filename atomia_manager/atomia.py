@@ -10,7 +10,7 @@ from xml.dom import minidom
 import sys
 import json
 import urllib2
-
+from pysimplesoap_atomia.client import SoapFault
 
 class InputError(Exception):
     """Exception raised for errors in the input.
@@ -84,11 +84,14 @@ def service_list(args, manager):
             import jsonpath
             result = jsonpath.jsonpath(json.loads(result), args.filter)
             
-            if result:
-                if args.first is True:
+            if args.first is True:
+                if result:
                     result = result[0]
-            
-            print json_repr(result)
+                    print json_repr(result).strip('"')
+                else:
+                    print ""
+            else: 
+                print json_repr(result)
         else:
             print result
     ''' else:
@@ -154,11 +157,16 @@ def service_find(args, manager):
             import jsonpath
             result = jsonpath.jsonpath(json.loads(result), args.filter)
             
-            if result:
-                if args.first is True:
+            if args.first is True:
+                if result:
                     result = result[0]
-                    
-        print json_repr(result)
+                    print json_repr(result).strip('"')
+                else:
+                    print ""
+            else: 
+                print json_repr(result)
+        else:
+            print result
     ''' else:
         raise Exception("Could not find service: " + service_name) '''
     return find_result_list
@@ -609,11 +617,14 @@ def entry():
     try:
         main(args)
     except InputError, (instance):
-        print instance.parameter
+        print >> sys.stderr, instance.parameter
         sys.exit(1)     
     except urllib2.HTTPError, error:
         dom = minidom.parseString(error.read())
-        print "Api returned an error: \n", dom.toprettyxml()
+        print >> sys.stderr, "Api returned an error: \n", dom.toprettyxml()
+        sys.exit(2)
+    except SoapFault, error:
+        print >> sys.stderr, "Api returned an error: \n", error.faultstring
         sys.exit(2)
 
 if __name__=="__main__":
