@@ -46,6 +46,14 @@
       <Filter>.*</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
     </HarvestDirectory>
+	<HarvestDirectory Include="..\console\">
+      <ComponentGroupName>console</ComponentGroupName>
+      <DirectoryRefId>FConsole</DirectoryRefId>
+      <SuppressCom>True</SuppressCom>
+      <SuppressRegistry>True</SuppressRegistry>
+      <Filter>^(?!.*\.exe).*$</Filter>
+      <KeepEmptyDirectories>false</KeepEmptyDirectories>
+    </HarvestDirectory>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">

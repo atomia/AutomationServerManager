@@ -19,13 +19,14 @@
             <File Source="..\license.txt"/>
           </Component>
           <Component Id="CStartupBat" Guid="{5BCAAEC9-DC97-47EE-9C4F-58DF8CFC99D5}">
-            <File Source="AutomationServerCmdClient.bat">
-              <Shortcut Id="DestkopShortcut" WorkingDirectory="FProduct" Directory="DesktopFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
-              <Shortcut Id="StartMenuShortcut" WorkingDirectory="FProduct" Directory="ProgramMenuFolder" Name="Automation Server Cmd Client" Advertise="yes" Icon="icon.ico"/>
-            </File>
+            <File Source="AutomationServerCmdClient.bat"/>
           </Component>
           <Component Id="CConf" Guid="{8C6011AE-E833-42CC-A073-34F777B5B4CB}">
             <File Source="..\atomia_manager\atomia.conf.dist"/>
+          </Component>
+
+          <Component Id="CIcon" Guid="{B49BF800-EA0A-4718-901B-E232120EAC8B}">
+            <File Source="icon.ico" Name="atomia.ico"/>
           </Component>
 
           <Component Id="CAutomationServiceCmdClient" Guid="{DB6D8B39-A1BD-4C95-B19F-5695BCA003B3}">
@@ -36,6 +37,14 @@
           </Component>
 
           <Directory Id="FShell" Name="Shell"/>
+          <Directory Id="FConsole" Name="Console">
+            <Component Id="CShortcuts" Guid="{202DD87B-75A6-48A7-B5F7-E7551CDE13BA}">
+              <File Source="..\console\Console.exe">
+                <Shortcut Id="DestkopShortcut" WorkingDirectory="FProduct" Directory="DesktopFolder" Name="Automation Server Cmd Client" Arguments="-r &quot;/k \&quot;[FProduct]\AutomationServerCmdClient.bat&quot;&quot; -w &quot;Automation Server Cmd Client&quot; -t atomia" Advertise="yes" Icon="icon.ico"/>
+                <Shortcut Id="StartMenuShortcut" WorkingDirectory="FProduct" Directory="ProgramMenuFolder" Name="Automation Server Cmd Client" Arguments="-r &quot;/k \&quot;[FProduct]\AutomationServerCmdClient.bat&quot; -w &quot;Automation Server Cmd Client&quot; -t atomia" Advertise="yes" Icon="icon.ico"/>
+              </File>
+            </Component>
+          </Directory>
         </Directory>
       </Directory>
       <Directory Id="DesktopFolder"/>
@@ -52,9 +61,12 @@
       <ComponentRef Id="CConf"/>
       <ComponentRef Id="CAutomationServiceCmdClient"/>
       <ComponentRef Id="CLicense"/>
+      <ComponentRef Id="CShortcuts"/>
+      <ComponentRef Id="CIcon"/>
 
       <ComponentGroupRef Id="pyd"/>
       <ComponentGroupRef Id="shell"/>
+      <ComponentGroupRef Id="console"/>
       
 			<ComponentGroupRef Id="Product.Generated" />
 		</Feature>
