@@ -18,15 +18,11 @@ __license__ = "LGPL 3.0"
 __version__ = "1.02c"
 
 import urllib
-try:
-    import httplib2
-    Http = httplib2.Http
-except ImportError:
-    import urllib2
-    class Http(): # wrapper to use when httplib2 not available
-        def request(self, url, method, body, headers):
-            f = urllib2.urlopen(urllib2.Request(url, body, headers))
-            return f.info(), f.read()
+import urllib2
+class Http(): # wrapper to use when httplib2 not available
+    def request(self, url, method, body, headers):
+        f = urllib2.urlopen(urllib2.Request(url, body, headers))
+        return f.info(), f.read()
 
     
 from simplexml import SimpleXMLElement, TYPE_MAP, OrderedDict
