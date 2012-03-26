@@ -7,18 +7,21 @@ import time
 from pysimplesoap_atomia.client import SoapClient
 from datetime import datetime
 import ConfigParser, os
+import ntplib
 
 class AtomiaActions(object):
     
     def __init__(self, username = None, password = None, api_url = None, token_created = None, token_expires = None, soap_header = None, body_xmlns = None):
 
+        x = ntplib.NTPClient()
+
         if token_created is None:
-            self.created = datetime.fromtimestamp(time.mktime(time.gmtime())).strftime('%Y-%m-%dT%H:%M:%SZ')
+            self.created = datetime.utcfromtimestamp(x.request('europe.pool.ntp.org').tx_time).strftime('%Y-%m-%dT%H:%M:%SZ')
         else:
             self.created = token_created
         
         if token_expires is None:
-            self.expires = datetime.fromtimestamp(time.mktime(time.gmtime()) + 300).strftime('%Y-%m-%dT%H:%M:%SZ')
+            self.expires = datetime.utcfromtimestamp(x.request('europe.pool.ntp.org').tx_time + 300).strftime('%Y-%m-%dT%H:%M:%SZ')
         else:
             self.expires = token_expires 
         
