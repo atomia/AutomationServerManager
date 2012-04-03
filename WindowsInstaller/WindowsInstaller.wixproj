@@ -20,6 +20,17 @@
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <SuppressSpecificWarnings>
+    </SuppressSpecificWarnings>
+  </PropertyGroup>
   <PropertyGroup>
     <VersionAssembly>..\dist\atomia.exe</VersionAssembly>
   </PropertyGroup>
@@ -37,6 +48,8 @@
       <SuppressRegistry>True</SuppressRegistry>
       <Filter>.*\.pyd$|.*\.dll$</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
+      <Link>
+      </Link>
     </HarvestDirectory>
     <HarvestDirectory Include="..\shell\">
       <ComponentGroupName>shell</ComponentGroupName>
@@ -45,14 +58,18 @@
       <SuppressRegistry>True</SuppressRegistry>
       <Filter>.*</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
+      <Link>
+      </Link>
     </HarvestDirectory>
-	<HarvestDirectory Include="..\console\">
+    <HarvestDirectory Include="..\console\">
       <ComponentGroupName>console</ComponentGroupName>
       <DirectoryRefId>FConsole</DirectoryRefId>
       <SuppressCom>True</SuppressCom>
       <SuppressRegistry>True</SuppressRegistry>
       <Filter>^(?!.*\.exe).*$</Filter>
       <KeepEmptyDirectories>false</KeepEmptyDirectories>
+      <Link>
+      </Link>
     </HarvestDirectory>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
