@@ -129,7 +129,7 @@ def service_find(args, manager):
     service_search_criteria_list = []
     search_properties = []
     if parent_service is not None:
-        tmp_ssc = AtomiaServiceSearchCriteria(service_name, relative_path, parent_service.to_xml_friendly_object('atom:ParentService', 'ParentService'))
+        tmp_ssc = AtomiaServiceSearchCriteria(service_name, relative_path, parent_service)
     else:
         tmp_ssc = AtomiaServiceSearchCriteria(service_name, relative_path)
     
@@ -552,7 +552,7 @@ def main(args):
         
         
 def str2bool(str):
-  return str.lower() in ("true", "1")
+    return str.lower() in ("true", "1")
 
 
 def entry():

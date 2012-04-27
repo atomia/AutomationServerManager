@@ -1,0 +1,27 @@
+'''
+Created on Nov 10, 2011
+
+@author: Dusan
+'''
+import os
+from setuptools import setup, find_packages
+import sys
+
+setup(
+    name = "atomia-client",
+    version = "12.5.0",
+    author = "Atomia AB",
+    author_email = "thorsten@atomia.com",
+    description = ("Client library for Atomia Automation Server."),
+    license = "Atomia",
+    keywords = "atomia automationserver server",
+    url = "http://www.atomia.com/",
+    packages=find_packages(),
+	setup_requires=['setuptools'],
+    classifiers=[
+        "Development Status :: 4 - Beta",
+		"Topic :: Internet",
+		"Programming Language :: Python",
+    ],
+)
+
