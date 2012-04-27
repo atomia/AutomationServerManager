@@ -40,3 +40,4 @@ build/
 *.msi
 *.egg-info/
 /testparams.txt
+atomia.conf

@@ -4,13 +4,15 @@ Created on Nov 7, 2011
 @author: Dusan
 
 '''
-from atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCriteria, AtomiaServiceSearchCriteriaProperty, AtomiaPackage, AtomiaAccountProperty
-from atomia_actions import AtomiaActions
+from atomia_client.atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCriteria, AtomiaServiceSearchCriteriaProperty, AtomiaPackage, AtomiaAccountProperty
+from atomia_client.atomia_actions import AtomiaActions
 from xml.dom import minidom
 import sys
 import json
 import urllib2
-from pysimplesoap_atomia.client import SoapFault
+from atomia_client.pysimplesoap_atomia.client import SoapFault
+import ConfigParser
+import os
 
 class InputError(Exception):
     """Exception raised for errors in the input.
@@ -503,7 +505,25 @@ def package_delete(args, manager):
     return True
 
 def main(args):
-    manager = AtomiaActions(username = args.username, password = args.password, api_url = args.url)
+    username = args.username
+    password = args.password
+    api_url = args.url
+    bootstrap = False
+    if (username is None or password is None or api_url is None):
+        config = ConfigParser.ConfigParser()
+        conf_file = config.read(['atomia.conf', os.path.dirname(os.path.realpath(__file__)) + '/atomia.conf', os.path.abspath('/etc/atomia.conf')])
+        if conf_file is not None and len(conf_file) > 0:
+            if username is None:
+                username = config.get("Automation Server API", "username")
+            if password is None:
+                password = config.get("Automation Server API", "password")
+            if api_url is None:
+                api_url = config.get("Automation Server API", "url")
+            
+            bootstrap = config.has_option("Automation Server API", "bootstrap") and config.getboolean("Automation Server API", "bootstrap")
+        else:
+            raise Exception("Could not find the config file!")
+    manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap)
     if args.entity == 'service':
         if args.account is None:
             raise InputError("Account number is required argument for this action.")
