@@ -13,6 +13,7 @@ import urllib2
 from atomia_client.pysimplesoap_atomia.client import SoapFault
 import ConfigParser
 import os
+import inspect
 
 class InputError(Exception):
     """Exception raised for errors in the input.
@@ -305,7 +306,7 @@ def find_service_by_arguments(manager, account, service_id, path, show_simple_pr
                     service_search_criteria_list = []
                     search_properties = []
                     if parent_service_for_criteria is not None:
-                        tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '', parent_service_for_criteria.to_xml_friendly_object('atom:ParentService', 'ParentService'))
+                        tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '', parent_service_for_criteria)
                     else:
                         tmp_ssc = AtomiaServiceSearchCriteria(str(count.keys()[0]), '')
                         
@@ -511,7 +512,7 @@ def main(args):
     bootstrap = False
     if (username is None or password is None or api_url is None):
         config = ConfigParser.ConfigParser()
-        conf_file = config.read(['atomia.conf', os.path.dirname(os.path.realpath(__file__)) + '/atomia.conf', os.path.abspath('/etc/atomia.conf')])
+        conf_file = config.read(['atomia.conf', os.path.dirname(os.path.realpath(inspect.stack()[-1][1])) + '/atomia.conf', os.path.abspath('/etc/atomia.conf')])
         if conf_file is not None and len(conf_file) > 0:
             if username is None:
                 username = config.get("Automation Server API", "username")
