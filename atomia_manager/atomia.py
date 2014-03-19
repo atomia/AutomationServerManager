@@ -174,8 +174,12 @@ def service_find(args, manager):
         raise Exception("Could not find service: " + service_name) '''
     return find_result_list
 
-def service_add(args, manager):
-    
+def service_add(args, manager, managernative):
+    if args.accountdata is not None:
+        account_data = json.loads(args.accountdata)
+    else:
+        account_data = None
+
     if args.servicedata is not None:
         service_description = json.loads(args.servicedata)
         if isinstance(service_description, dict):
@@ -216,11 +220,16 @@ def service_add(args, manager):
                         else:
                             list_count.prop_string_value = service_properties[list_count.name] 
 
-            
-            if parent_service is not None:
-                add_service_result = manager.add_service([created_service.to_xml_friendly_object()], [parent_service.to_xml_friendly_object()], args.account)
+            if args.noresource: 
+                if parent_service is not None:
+                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], None, None, [parent_service.to_xml_friendly_object()], args.account, None, False)
+                else:
+                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], None, None, None, args.account, None, False)
             else:
-                add_service_result = manager.add_service([created_service.to_xml_friendly_object()], None, args.account)
+                if parent_service is not None:
+                    add_service_result = manager.add_service([created_service.to_xml_friendly_object()], [parent_service.to_xml_friendly_object()], args.account)
+                else:
+                    add_service_result = manager.add_service([created_service.to_xml_friendly_object()], None, args.account)
             
             if add_service_result.has_key("AddServiceResult") and len(add_service_result["AddServiceResult"]) == 1:
                 for k in add_service_result["AddServiceResult"]:
@@ -234,17 +243,20 @@ def service_add(args, manager):
     else:
         raise Exception("Could not create service: " + service_name)
 
-def service_delete(args, manager):
+def service_delete(args, manager, managernative):
     service_to_delete = find_service_by_arguments(manager, args.account, args.service, args.path)
     if service_to_delete is not None:
-        manager.delete_service([service_to_delete.to_xml_friendly_object()], args.account)
+        if args.noresource:
+            managernative.delete_service_native([service_to_delete.to_xml_friendly_object()], False)
+        else:
+            manager.delete_service([service_to_delete.to_xml_friendly_object()], args.account)
         print "Deleted service " + service_to_delete.logical_id + " successfully."
         return True
     else:
         raise Exception("No service found!")
     
     
-def service_modify(args, manager):
+def service_modify(args, manager, managernative):
     
     if args.servicedata is not None:
         service_description = json.loads(args.servicedata)
@@ -275,8 +287,11 @@ def service_modify(args, manager):
             for list_count in current_service.properties:
                 if (service_properties.has_key(list_count.name)):
                     list_count.prop_string_value = service_properties[list_count.name]
-                
-        modify_service_result = manager.modify_service([current_service.to_xml_friendly_object()], args.account)
+
+        if args.noresource:
+            modify_service_result = managernative.modify_service_native([current_service.to_xml_friendly_object()], False)
+        else:
+            modify_service_result = manager.modify_service([current_service.to_xml_friendly_object()], args.account)
         
         if modify_service_result.has_key("ModifyServiceResult") and len(modify_service_result["ModifyServiceResult"]) == 1:
             for k in modify_service_result["ModifyServiceResult"]:
@@ -509,6 +524,7 @@ def main(args):
     username = args.username
     password = args.password
     api_url = args.url
+    nativeapi_url = args.nativeurl
     bootstrap = False
     if (username is None or password is None or api_url is None):
         config = ConfigParser.ConfigParser()
@@ -520,11 +536,19 @@ def main(args):
                 password = config.get("Automation Server API", "password")
             if api_url is None:
                 api_url = config.get("Automation Server API", "url")
+            if nativeapi_url is None:
+                nativeapi_url = config.get("Automation Server API", "nativeurl")
             
             bootstrap = config.has_option("Automation Server API", "bootstrap") and config.getboolean("Automation Server API", "bootstrap")
         else:
             raise Exception("Could not find the config file!")
+
     manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap)
+    if args.noresource and args.entity == 'service':
+        managernative = AtomiaActions(username = username, password = password, api_url = nativeapi_url, bootstrap = bootstrap)
+    else:
+        managernative = None
+
     if args.entity == 'service':
         if args.account is None:
             raise InputError("Account number is required argument for this action.")
@@ -535,11 +559,11 @@ def main(args):
         elif args.action == 'find':
             return service_find(args, manager)
         elif args.action == "add":
-            return service_add(args, manager)
+            return service_add(args, manager, managernative)
         elif args.action == "delete":
-            return service_delete(args, manager)
+            return service_delete(args, manager, managernative)
         elif args.action == "modify":
-            return service_modify(args, manager)
+            return service_modify(args, manager, managernative)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
     elif args.entity == 'account':
@@ -590,6 +614,7 @@ def entry():
             atomia service find --account 101321 --parent "d83805a8-c4a3-4e17-96af-4c9f0c1679d2" --query '{ "name" : "ApacheWebSite", "path" : "CsLinuxWebsite", "properties" : { "PhpVersion" : "5.2"} }'
             atomia service find --account 101321 --path '[{"CsBase" : "d83805a8-c4a3-4e17-96af-4c9f0c1679d2"}, {"CsWindowsWebsite" : { "Hostname" : "python44.org"}}]' --query '{ "name" : "DnsZoneRecord", "path" : "DnsZone" }'
             atomia service add --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
+            atomia service add --noresource --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
             atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
             atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
             atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
@@ -605,7 +630,9 @@ def entry():
     parser = argparse.ArgumentParser(description='Atomia Automation Server Manager', prog='atomia', epilog = epilog, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--username', help="The API user's username")
     parser.add_argument('--password', help="The API user's password")
-    parser.add_argument('--url',  metavar='API_URL', help="The URL of the Automation Server API's wsdl")
+    parser.add_argument('--url',  metavar='API_URL', help="The URL of the Automation Server Core API's wsdl")
+    parser.add_argument('--nativeurl',  metavar='NATIVEAPI_URL', help="The URL of the Automation Server Native API's wsdl")
+    parser.add_argument('--noresource', action='store_true', help="If set for service actions, then they will be done through Native API not touching resource")
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
     parser.add_argument('--account', help='The account in Automation Server. Required for service *, package *, account show|delete.')

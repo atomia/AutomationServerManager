@@ -119,6 +119,13 @@ class AtomiaActions(object):
                                     serviceName = service_name,
                                     parentService = parent_service,
                                     accountName = account_number)
+
+    def create_service_native(self, service_name, provisioning_description, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.CreateService(username, password, 
+                                    serviceName = service_name,
+                                    provisioningDescription = provisioning_description)
         
     def add_service(self, service, parent_service, account_number, resource_request_descriptions = None, username = None, password = None):
         username = self.username if username == None else username
@@ -128,6 +135,19 @@ class AtomiaActions(object):
                                     parentService = parent_service,
                                     accountName = account_number,
                                     resourceRequestDescriptions = resource_request_descriptions)
+
+    def add_service_native(self, service, parent_service, resource_name, resource_description_manager_name, account_id, package, on_resource, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.AddService(username, password, 
+                                    serviceToAdd = service,
+                                    resourceName = resource_name,
+                                    resourceDescriptionManagerName = resource_description_manager_name,
+                                    parentService = parent_service,
+                                    accountId = account_id,
+                                    package = package,
+                                    autoAssignPackage = 1,
+                                    provisionOnResource = on_resource)
         
     def delete_service(self, service, account_number, username = None, password = None):
         username = self.username if username == None else username
@@ -136,15 +156,27 @@ class AtomiaActions(object):
                                     service = service,
                                     accountName = account_number)
         
+    def delete_service_native(self, service, on_resource, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.DeleteService(username, password, 
+                                    service = service,
+                                    deleteOnResource = on_resource)
         
-    def modify_service (self, service, account_number, username = None, password = None):
+    def modify_service(self, service, account_number, username = None, password = None):
         username = self.username if username == None else username
         password = self.password if password == None else password
         return self.client.ModifyService(username, password, 
                                     service = service,
                                     accountName = account_number)
-
         
+    def modify_service_native(self, service, on_resource, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.ModifyService(username, password, 
+                                    service = service,
+                                    modifyOnResource = on_resource)
+
     def find_services_by_path_with_paging(self, search_criteria_list, account_number, search_properties = None,  sort_by_prop_name = '', sort_asc = 'true', page_number ='0', page_size = '100', username = None, password = None):
         username = self.username if username == None else username
         password = self.password if password == None else password

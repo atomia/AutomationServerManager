@@ -1,0 +1,45 @@
+#!/bin/sh
+
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || ! [ -f "$3" ]; then
+	echo "usage: $0 account zone records_file"
+	echo "records_file is a file where each row is a record of form:"
+	echo "somelabel 3600 IN A 127.0.0.1"
+	echo
+	echo "You should not include SOA or NS, they get created as setup in provisioning description."
+	exit 1
+fi
+
+account="$1"
+zone="$2"
+records="$3"
+
+output=`atomia service add --account "$account" --servicedata '{ "name": "CsDomainNoWebsite", "properties" : { "DnsZone": "'"$zone"'", "Domain": "'"$zone"'", "DnsZoneIsSlave": null } }'`
+if [ $? != 0 ]; then
+	echo "There was an error adding the zone $zone to the account $account"
+	exit 1
+fi
+
+parent_id=`echo "$output" | grep logical_id | cut -d '"' -f 4`
+if [ -z "$parent_id" ]; then
+	echo "There was an error adding the zone $zone to the account $account, couldn't find logical id in output"
+	exit 1
+fi
+
+parent_id=`atomia service list --account 100002 --parent "$parent_id" | grep logical_id | cut -d '"' -f 4`
+
+while read label ttl class type rdata; do
+	if ! atomia service add --account "$account" --parent "$parent_id" --servicedata '{ "name": "DnsZoneRecord", "properties" : {'"
+			\"Label\": \"$label\",
+			\"Ttl\": \"$ttl\",
+			\"DnsClass\": \"$class\",
+			\"DnsType\": \"$type\",
+			\"Data\": \"$rdata\"
+		"'} }' > /dev/null; then
+
+		echo "There was an error adding a record to the new zone $zone with id $parent_id, this was the record contents:"
+		echo "$label $ttl $class $type $rdata"
+		exit 1
+	fi
+done < "$records"
+
+exit 0
