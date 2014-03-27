@@ -520,6 +520,33 @@ def package_delete(args, manager):
     print "Deleted package " + package_name + " for account " + args.account + " successfully."
     return True
 
+def package_change(args, manager):
+
+    if args.packagedata is not None:
+        package_data = json.loads(args.packagedata)
+        if isinstance(package_data, dict):
+            if package_data.has_key('package_id'):
+                package_id = package_data['package_id']
+            else:
+                raise InputError("packagedata argument must contain key package_id")
+            if package_data.has_key('package_name'):
+                package_name = package_data['package_name']
+            else:
+                raise InputError("packagedata argument must contain key package_name")
+            if package_data.has_key('new_package_name'):
+               new_package_name = package_data['new_package_name']
+            else:
+                raise InputError("packagedata argument must contain key new_package_name")
+        else:
+            raise InputError("Invalid format of packagedata argument.")
+    else:
+        raise InputError("packagedata is required argument for this action.")
+
+    current_package = AtomiaPackage(package_id=package_id, package_name=package_name)
+
+    manager.change_package(account_number=args.account, package=[current_package.to_xml_friendly_object()], new_package_name=new_package_name)
+    return True
+
 def main(args):
     username = args.username
     password = args.password
@@ -592,6 +619,8 @@ def main(args):
             return package_add(args, manager)
         elif args.action == 'delete':
             return package_delete(args, manager)
+        elif args.action == 'change':
+            return package_change(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
         
@@ -621,6 +650,7 @@ def entry():
             atomia package list --account 101321
             atomia package delete --account 101321 --packagedata '{ "package_id" : "fd90201c-51a3-4057-b954-ad4d067b9431",  "package_name" : "DomainRegistrationContactPackage"}'
             atomia package add --account 101321 --packagedata '{ "package_name" : "BasePackage", "package_arguments" : { "test1": "value1", "test2": "value2" }}'
+            atomia package change --account 101321 --packagedata '{ "package_id": "fd90201c-51a3-4057-b954-ad4d067b9431", "package_name": "BasePackage", "new_package_name": "DnsPackage" }'
             
             Note:
             In Windows cmd.exe escape the quotes in the following way:

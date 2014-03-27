@@ -111,6 +111,11 @@ class AtomiaActions(object):
         username = self.username if username == None else username
         password = self.password if password == None else password       
         return self.client.DeletePackageForAccount( username, password, accountName = account_number, package = package )
+
+    def change_package(self, account_number, package, new_package_name, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.ChangePackage( username, password, accountId=account_number, package=package, newPackageName=new_package_name)
     
     def create_service(self, service_name, parent_service, account_number, username = None, password = None):
         username = self.username if username == None else username
