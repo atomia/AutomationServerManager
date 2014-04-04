@@ -9,7 +9,7 @@ import sys
 
 setup(
     name = "atomia-client",
-    version = "12.5.0",
+    version = read('../version.txt').rstrip(),
     author = "Atomia AB",
     author_email = "thorsten@atomia.com",
     description = ("Client library for Atomia Automation Server."),
