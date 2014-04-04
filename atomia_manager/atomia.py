@@ -570,9 +570,9 @@ def main(args):
         else:
             raise Exception("Could not find the config file!")
 
-    manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap)
+    manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap, debug = args.debug)
     if args.noresource and args.entity == 'service':
-        managernative = AtomiaActions(username = username, password = password, api_url = nativeapi_url, bootstrap = bootstrap)
+        managernative = AtomiaActions(username = username, password = password, api_url = nativeapi_url, bootstrap = bootstrap, debug = args.debug)
     else:
         managernative = None
 
@@ -663,6 +663,7 @@ def entry():
     parser.add_argument('--url',  metavar='API_URL', help="The URL of the Automation Server Core API's wsdl")
     parser.add_argument('--nativeurl',  metavar='NATIVEAPI_URL', help="The URL of the Automation Server Native API's wsdl")
     parser.add_argument('--noresource', action='store_true', help="If set for service actions, then they will be done through Native API not touching resource")
+    parser.add_argument('--debug', action='store_true', help="If set, then trace all SOAP calls giving lots of debugging info")
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
     parser.add_argument('--account', help='The account in Automation Server. Required for service *, package *, account show|delete.')

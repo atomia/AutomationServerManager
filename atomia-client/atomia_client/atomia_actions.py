@@ -8,13 +8,14 @@ import ConfigParser, os
 
 class AtomiaActions(object):
     
-    def __init__(self, username = None, password = None, api_url = None, accountapi_url = None, bootstrap = False, soap_header = None, body_xmlns = None, account_body_xmlns = None):
+    def __init__(self, username = None, password = None, api_url = None, accountapi_url = None, bootstrap = False, soap_header = None, body_xmlns = None, account_body_xmlns = None, debug = False):
        
         self.username = username
         self.password = password
         self.api_url = api_url
         self.accountapi_url = accountapi_url
         self.bootstrap = bootstrap
+        self.debug = debug
         
         if soap_header is None:
             
@@ -56,11 +57,11 @@ class AtomiaActions(object):
         else:
             self.account_body_xmlns = account_body_xmlns
             
-        self.client = SoapClient(wsdl=self.api_url, header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=False)
+        self.client = SoapClient(wsdl=self.api_url, header=self.header, body_xmlns= self.body_xmlns, namespace="http://atomia.com/atomia/provisioning/", trace=self.debug)
         if accountapi_url is None:
             self.account_client = None
         else:
-            self.account_client = SoapClient(wsdl=self.accountapi_url, header=self.header, body_xmlns= self.account_body_xmlns, namespace="http://atomia.com/atomia/accountapi/", trace=False)
+            self.account_client = SoapClient(wsdl=self.accountapi_url, header=self.header, body_xmlns= self.account_body_xmlns, namespace="http://atomia.com/atomia/accountapi/", trace=self.debug)
         
     def get_account_for_user(self, user, username = None, password = None):
         username = self.username if username == None else username
