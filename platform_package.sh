@@ -1,12 +1,8 @@
 #!/bin/sh
 
 version_from_file=`cat version.txt`
-version_from_client=`grep version atomia-client/setup.py | cut -d '"' -f 2`
 
-if [ -z "$version_from_file" ] || [ x"$version_from_file" != x"$version_from_client" ]; then
-	echo "invalid version, file doesn't match client version, file=$version_from_file, client=$version_from_client"
-	exit 1
-fi
+cat "atomia-client/setup.py.input" | sed -e "s/%VERSION/$version_from_file/g" > "atomia-client/setup.py"
 
 if [ -x "/usr/bin/dpkg" ]; then
 	# atomia manager package

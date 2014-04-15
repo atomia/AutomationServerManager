@@ -21,7 +21,7 @@ setup(
     url = "https://github.com/atomia/AutomationServerManager",
     packages=find_packages(),
     long_description=read('README.md'),
-	install_requires=['argparse >= 1.1', 'jsonpath >= 0.53', 'atomia-client >= 12.5.0'],
+	install_requires=['argparse', 'jsonpath >= 0.53', 'atomia-client >= ' + read('version.txt').rstrip()],
 	setup_requires=['setuptools'],
     classifiers=[
         "Development Status :: 4 - Beta",
