@@ -385,16 +385,18 @@ def account_list(args, manager):
         raise Exception("Could not find any account.")
     
 def account_show(args, manager):
-    
+
     accounts_result = manager.get_account(args.account)
-    
-    if accounts_result.has_key("GetAccountResult") and len(accounts_result["GetAccountResult"].children()) > 0:
+
+    if accounts_result.has_key("GetAccountResult") and accounts_result["GetAccountResult"].children() is not None and len(accounts_result["GetAccountResult"].children()) > 0:
         account_result = AtomiaAccount()
         account_result.from_simplexml(accounts_result["GetAccountResult"])
         account_result.print_me()
         return account_result
     else:
-        raise Exception("Could not find any account with number " + args.account)    
+        result = "{\n\t\"error\": \"don't exist\"\n}"
+		print result
+        return result
 
 
 def account_add(args, manager):
