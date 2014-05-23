@@ -111,7 +111,7 @@ class AtomiaActions(object):
     def delete_package(self, account_number, package, username = None, password = None):
         username = self.username if username == None else username
         password = self.password if password == None else password       
-        return self.client.DeletePackageForAccount( username, password, accountName = account_number, package = package )
+        return self.client.DeletePackageForAccount( username, password, accountName = account_number, package = package, forceDelete = "true")
 
     def change_package(self, account_number, package, new_package_name, username = None, password = None):
         username = self.username if username == None else username
