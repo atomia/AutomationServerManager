@@ -152,7 +152,7 @@ class AtomiaActions(object):
                                     parentService = parent_service,
                                     accountId = account_id,
                                     package = package,
-                                    autoAssignPackage = 1,
+                                    autoAssignPackage = 0,
                                     provisionOnResource = on_resource)
         
     def delete_service(self, service, account_number, username = None, password = None):

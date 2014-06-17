@@ -220,11 +220,22 @@ def service_add(args, manager, managernative):
                         else:
                             list_count.prop_string_value = service_properties[list_count.name] 
 
-            if args.noresource: 
-                if parent_service is not None:
-                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], None, None, [parent_service.to_xml_friendly_object()], args.account, None, False)
+            if args.noresource:
+                if args.packagedata is not None:
+                    package_data = json.loads(args.packagedata)
+                    if isinstance(package_data, dict) and package_data.has_key('package_id') and package_data.has_key('package_name'):
+                            package_arg = [ AtomiaPackage(package_id=package_data['package_id'], package_name=package_data['package_name']).to_xml_friendly_object() ]
+                    else:
+                        raise InputError("packagedata argument must contain key package_id and package_name")
                 else:
-                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], None, None, None, args.account, None, False)
+                    package_arg = None
+
+                if args.resourcename is None:
+                    raise Exception("When specifying --noresource you have to specify --resourcename as well")
+                elif parent_service is not None:
+                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], [parent_service.to_xml_friendly_object()], args.resourcename, None, args.account, package_arg, False)
+                else:
+                    add_service_result = managernative.add_service_native([created_service.to_xml_friendly_object()], None, args.resourcename, None, args.account, package_arg, False)
             else:
                 if parent_service is not None:
                     add_service_result = manager.add_service([created_service.to_xml_friendly_object()], [parent_service.to_xml_friendly_object()], args.account)
@@ -645,7 +656,7 @@ def entry():
             atomia service find --account 101321 --parent "d83805a8-c4a3-4e17-96af-4c9f0c1679d2" --query '{ "name" : "ApacheWebSite", "path" : "CsLinuxWebsite", "properties" : { "PhpVersion" : "5.2"} }'
             atomia service find --account 101321 --path '[{"CsBase" : "d83805a8-c4a3-4e17-96af-4c9f0c1679d2"}, {"CsWindowsWebsite" : { "Hostname" : "python44.org"}}]' --query '{ "name" : "DnsZoneRecord", "path" : "DnsZone" }'
             atomia service add --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
-            atomia service add --noresource --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
+            atomia service add --noresource --resourcename "MySQLResource1" --account 101321 --packagedata '{ "package_id" : "fd90201c-51a3-4057-b954-ad4d067b9431", "package_name": "BasePackage" }' --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
             atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
             atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
             atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
@@ -664,7 +675,8 @@ def entry():
     parser.add_argument('--password', help="The API user's password")
     parser.add_argument('--url',  metavar='API_URL', help="The URL of the Automation Server Core API's wsdl")
     parser.add_argument('--nativeurl',  metavar='NATIVEAPI_URL', help="The URL of the Automation Server Native API's wsdl")
-    parser.add_argument('--noresource', action='store_true', help="If set for service actions, then they will be done through Native API not touching resource")
+    parser.add_argument('--noresource', action='store_true', help="If set for service actions, then they will be done through Native API not touching resource. When set you need to specify the resource name that the service will be imported as beeing on.")
+    parser.add_argument('--resourcename', help="If --noresource is set, then this is used to specify the resource name")
     parser.add_argument('--debug', action='store_true', help="If set, then trace all SOAP calls giving lots of debugging info")
     parser.add_argument('entity', help='account|package|service')
     parser.add_argument('action', help='show|list|find|add|delete|modify')
