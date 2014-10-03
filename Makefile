@@ -16,7 +16,7 @@ clean:
 
 semiclean:
 	$(eval TMP_ART := $(shell mktemp -d))
-	$(shell mv *.egg *.exe *.deb *.rpm $(TMP_ART) 2>&1 | grep -v "cannot stat")
+	$(shell mv *.egg *.deb *.rpm $(TMP_ART) 2>&1 | grep -v "cannot stat")
 	git clean -fdx
 	mv $(TMP_ART)/* .
 	rm -rf $(TMP_ART)
