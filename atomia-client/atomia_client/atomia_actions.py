@@ -209,3 +209,12 @@ class AtomiaActions(object):
                                                 sortAsc = sort_asc,
                                                 pageNumber = page_number,
                                                 pageSize = page_size)
+
+    def call_operation_on_service(self, service, account_number, operation, arguments, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.CallOperation(username, password,
+                                    service = service,
+                                    operationName = operation,
+                                    operationArgument = arguments,
+                                    accountId = account_number)
