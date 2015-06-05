@@ -313,6 +313,17 @@ def service_modify(args, manager, managernative):
         else:
             raise Exception("Could not modify service: " + current_service.name)
                     
+def service_operation(args, manager, managernative):
+    service_to_call = find_service_by_arguments(manager, args.account, args.service, args.path)
+    if service_to_call is not None:
+        if args.operation is not None:
+            operation_result = manager.call_operation_on_service([service_to_call.to_xml_friendly_object()], args.account, args.operation, args.arg)
+            print operation_result
+        else:
+            raise InputError("operation is a required argument for this action.")
+    else:
+        raise Exception("Could not find service to perform operation on")
+
 def find_service_by_arguments(manager, account, service_id, path, show_simple_props = False):
     
     if service_id is not None:
@@ -604,6 +615,8 @@ def main(args):
             return service_delete(args, manager, managernative)
         elif args.action == "modify":
             return service_modify(args, manager, managernative)
+        elif args.action == "operation":
+            return service_operation(args, manager, managernative)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
     elif args.entity == 'account':
@@ -659,6 +672,7 @@ def entry():
             atomia service add --noresource --resourcename "MySQLResource1" --account 101321 --packagedata '{ "package_id" : "fd90201c-51a3-4057-b954-ad4d067b9431", "package_name": "BasePackage" }' --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
             atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
             atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
+            atomia service operation --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --operation "OperationName" --arg "Arguments"
             atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
             atomia package list --account 101321
             atomia package delete --account 101321 --packagedata '{ "package_id" : "fd90201c-51a3-4057-b954-ad4d067b9431",  "package_name" : "DomainRegistrationContactPackage"}'
@@ -695,6 +709,9 @@ def entry():
     parser.add_argument('--simpleProps', help="Fill simple property structure, used for JSON paths.")
     ''' changes by Vukasin '''
     
+    parser.add_argument('--operation', help="The operation to perform on service")
+    parser.add_argument('--arg', help="Operation arguments to pass")
+
     args = parser.parse_args()
     
     if args.first is not None:
