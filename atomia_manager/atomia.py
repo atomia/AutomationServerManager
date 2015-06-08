@@ -318,7 +318,10 @@ def service_operation(args, manager, managernative):
     if service_to_call is not None:
         if args.operation is not None:
             operation_result = manager.call_operation_on_service([service_to_call.to_xml_friendly_object()], args.account, args.operation, args.arg)
-            print operation_result
+            if operation_result.has_key("CallOperationResult"):
+                print operation_result['CallOperationResult'].strip('"')
+            else:
+                raise Exception("Operation failed")
         else:
             raise InputError("operation is a required argument for this action.")
     else:
