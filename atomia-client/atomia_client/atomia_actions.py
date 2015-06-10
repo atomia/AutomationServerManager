@@ -218,3 +218,12 @@ class AtomiaActions(object):
                                     operationName = operation,
                                     operationArgument = arguments,
                                     accountId = account_number)
+
+    def switch_service(self, service, account_number, newService, servicedata, username = None, password = None):
+        username = self.username if username == None else username
+        password = self.password if password == None else password
+        return self.client.SwitchService(username, password,
+                                    service = service,
+                                    newServiceName = newService,
+                                    additionalData = servicedata,
+                                    accountName = account_number)
