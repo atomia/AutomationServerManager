@@ -327,6 +327,39 @@ def service_operation(args, manager, managernative):
     else:
         raise Exception("Could not find service to perform operation on")
 
+def service_switch(args, manager):
+    current_service = find_service_by_arguments(manager, args.account, args.service, args.path)
+    if current_service is None:
+        raise Exception("Could not find current service")
+
+    if args.servicedata is not None:
+        service_description = json.loads(args.servicedata)
+        if isinstance(service_description, dict):
+            if service_description.has_key('properties'):
+                if isinstance(service_description['properties'], dict):
+                    service_properties = service_description['properties']
+                else:
+                    raise InputError("Invalid format of properties argument.")
+            else:
+                raise InputError("properties is required argument for this action")
+        else:
+            raise InputError("Invalid format of service argument.")
+    else:
+        raise InputError("service is required argument for this action.")
+
+    search_properties = []
+    for k,v in service_description["properties"].items():
+        tmp_property = AtomiaServiceSearchCriteriaProperty(k, v)
+        search_properties.append(tmp_property.to_xml_friendly_object('arr:KeyValueOfstringstring', 'KeyValueOfstringstring'))
+
+    modify_service_result = manager.switch_service([current_service.to_xml_friendly_object()], args.account, args.newservice, search_properties)
+
+    if modify_service_result.has_key("SwitchServiceResult") and len(modify_service_result["SwitchServiceResult"]) == 1:
+        return modify_service_result
+    else:
+        raise Exception("Could not modify service: " + current_service.name)
+
+
 def find_service_by_arguments(manager, account, service_id, path, show_simple_props = False):
     
     if service_id is not None:
@@ -620,6 +653,8 @@ def main(args):
             return service_modify(args, manager, managernative)
         elif args.action == "operation":
             return service_operation(args, manager, managernative)
+        elif args.action == "switch":
+            return service_switch(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
     elif args.entity == 'account':
@@ -674,6 +709,7 @@ def entry():
             atomia service add --account 101321 --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
             atomia service add --noresource --resourcename "MySQLResource1" --account 101321 --packagedata '{ "package_id" : "fd90201c-51a3-4057-b954-ad4d067b9431", "package_name": "BasePackage" }' --parent "b287bc9f-c0ae-43c4-88b0-ccb2bea4a17d" --servicedata '{ "name" : "CsMySqlDatabase", "properties" : { "DatabaseName" : "testpy46", "CharacterSet" : "utf8", "Collation" : "utf8_general_ci"}}'
             atomia service modify --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
+            atomia service switch --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --newservice 'CsDomainNoWebsite' --servicedata '{ "properties" : { "Collation" : "utf8_unicode_ci"}}'
             atomia service delete --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b"
             atomia service operation --account 101321 --service "61575762-d85a-4c6f-b953-5a71a504106b" --operation "OperationName" --arg "Arguments"
             atomia account add --accountdata '{ "account_id":"manageracc1", "account_description" : "My desc"}'
@@ -714,6 +750,7 @@ def entry():
     
     parser.add_argument('--operation', help="The operation to perform on service")
     parser.add_argument('--arg', help="Operation arguments to pass")
+    parser.add_argument('--newservice', help="New service to switch to")
 
     args = parser.parse_args()
     
