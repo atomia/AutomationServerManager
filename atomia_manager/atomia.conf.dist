@@ -3,3 +3,7 @@ username=atomia_username
 password=atomia_password
 url=https://example.com/CoreAPIBasicAuth.svc?wsdl
 bootstrap=false
+
+[Billing API]
+url=https://example.com/AtomiaBillingApiBasicAuth.svc?wsdl
+

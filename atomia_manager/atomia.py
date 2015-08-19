@@ -5,7 +5,9 @@ Created on Nov 7, 2011
 
 '''
 from atomia_client.atomia_entities import AtomiaAccount, AtomiaService, AtomiaServiceSearchCriteria, AtomiaServiceSearchCriteriaProperty, AtomiaPackage, AtomiaAccountProperty
+from atomia_client.billing_entities import BillingAccount
 from atomia_client.atomia_actions import AtomiaActions
+from atomia_client.billing_actions import BillingActions
 from xml.dom import minidom
 import sys
 import json
@@ -607,10 +609,32 @@ def package_change(args, manager):
     manager.change_package(account_number=args.account, package=[current_package.to_xml_friendly_object()], new_package_name=new_package_name)
     return True
 
+##### BILLING ACTIONS #####
+
+def billing_account_list(args, manager):
+    accounts_result = manager.get_account(args.account)
+
+    if accounts_result.has_key("GetAccountByNameResult") and accounts_result["GetAccountByNameResult"].children() is not None and len(accounts_result["GetAccountByNameResult"].children()) > 0:
+        account_result = BillingAccount()
+        account_result.from_simplexml(accounts_result["GetAccountByNameResult"])
+        account_result.print_me()
+        return account_result
+    else:
+        result = "{\n\t\"error\": \"don't exist\"\n}"
+	print result
+        return result
+
+def billing_send_email(args, manager):
+    email_result = manager.send_email(args.account, args.template, args.properties)
+
+    print email_result
+
+
 def main(args):
     username = args.username
     password = args.password
     api_url = args.url
+    billing_api_url = args.url
     nativeapi_url = args.nativeurl
     bootstrap = False
     if (username is None or password is None or api_url is None):
@@ -625,12 +649,16 @@ def main(args):
                 api_url = config.get("Automation Server API", "url")
             if nativeapi_url is None:
                 nativeapi_url = config.get("Automation Server API", "nativeurl")
+            if billing_api_url is None:
+                billing_api_url = config.get("Billing API", "url")
             
             bootstrap = config.has_option("Automation Server API", "bootstrap") and config.getboolean("Automation Server API", "bootstrap")
         else:
             raise Exception("Could not find the config file!")
 
-    manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap, debug = args.debug)
+    manager = ""#AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap, debug = args.debug)
+    billingmanager = BillingActions(username = username, password = password, api_url = billing_api_url, bootstrap = bootstrap, debug = args.debug)
+
     if args.noresource and args.entity == 'service':
         managernative = AtomiaActions(username = username, password = password, api_url = nativeapi_url, bootstrap = bootstrap, debug = args.debug)
     else:
@@ -687,6 +715,14 @@ def main(args):
             return package_change(args, manager)
         else:
             raise InputError("Unknown action: " + args.action + " for the entity: " + args.entity)
+    elif args.entity == 'billing-account':
+        if args.account is None:
+                raise InputError("Account number is required argument for this action.")
+        if args.action == 'show':
+            return billing_account_list(args, billingmanager)
+        if args.action == 'email':
+            return billing_send_email(args, billingmanager)
+
         
         
 def str2bool(str):
@@ -718,6 +754,9 @@ def entry():
             atomia package add --account 101321 --packagedata '{ "package_name" : "BasePackage", "package_arguments" : { "test1": "value1", "test2": "value2" }}'
             atomia package change --account 101321 --packagedata '{ "package_id": "fd90201c-51a3-4057-b954-ad4d067b9431", "package_name": "BasePackage", "new_package_name": "DnsPackage" }'
             
+            atomia billing-account show --account 101321
+            atomia billing-account email --account 101321 --template "MyTemplate" --properties [{"parameter" : "value"}]
+
             Note:
             In Windows cmd.exe escape the quotes in the following way:
             atomia service show --account 101321 --path "[{\\"CsBase\\" : \\"d83805a8-c4a3-4e17-96af-4c9f0c1679d2\\" }, {\\"CsLinuxWebsite\\" : \\"584e20b8-756f-49e4-b426-a58b835a873e\\"} ]"
@@ -751,6 +790,8 @@ def entry():
     parser.add_argument('--operation', help="The operation to perform on service")
     parser.add_argument('--arg', help="Operation arguments to pass")
     parser.add_argument('--newservice', help="New service to switch to")
+    parser.add_argument('--template', help="Name of the email template to use")
+    parser.add_argument('--properties', help="List of properties")
 
     args = parser.parse_args()
     
