@@ -656,7 +656,7 @@ def main(args):
         else:
             raise Exception("Could not find the config file!")
 
-    manager = ""#AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap, debug = args.debug)
+    manager = AtomiaActions(username = username, password = password, api_url = api_url, bootstrap = bootstrap, debug = args.debug)
     billingmanager = BillingActions(username = username, password = password, api_url = billing_api_url, bootstrap = bootstrap, debug = args.debug)
 
     if args.noresource and args.entity == 'service':
