@@ -86,7 +86,7 @@ def service_list(args, manager):
         
         ''' filter results '''
         if args.filter is not None:
-            import jsonpath
+            from jsonpath_rw import jsonpath
             result = jsonpath.jsonpath(json.loads(result), args.filter)
             
             if args.first is True:

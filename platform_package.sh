@@ -9,7 +9,7 @@ if [ -x "/usr/bin/dpkg" ]; then
 	./exec_fpm.sh -n atomia-manager -s python -t deb ./setup.py
 	
 	# jsonpath package
-	if ! ./exec_fpm.sh -n python-jsonpath -s python -t deb jsonpath; then
+	if ! ./exec_fpm.sh -n python-jsonpath-rw -s python -t deb jsonpath-rw; then
 		exit 1
 	fi
 
