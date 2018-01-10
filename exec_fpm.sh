@@ -13,7 +13,7 @@ if [ -z "$ruby" ]; then
 	exit 1
 fi
 
-fpm=`find /var/lib/gems/ /usr/lib*/ruby/gems/ -path "*/gems/fpm-*/bin/fpm" 2> /dev/null`
+fpm=`find /var/lib/gems/ /usr/local/share/gems/ /usr/lib*/ruby/gems/ -path "*/gems/fpm-*/bin/fpm" 2> /dev/null`
 if [ -z "$fpm" ]; then
 	echo "didn't find fpm, assuming it isn't installed"
 	exit 1
