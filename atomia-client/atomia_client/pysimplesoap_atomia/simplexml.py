@@ -19,8 +19,12 @@ __version__ = "1.02c"
 
 import xml.dom.minidom
 from decimal import Decimal
-import datetime 
+import datetime
 import time
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 DEBUG = False
 
@@ -41,7 +45,7 @@ class Alias():
         return self.py_type(value)
     def __repr__(self):
         return "<alias '%s' for '%s'>" % (self.xml_type, self.py_type)
-        
+
 byte = Alias(str,'byte')
 short = Alias(int,'short')
 double = Alias(float,'double')
@@ -53,7 +57,7 @@ Time = datetime.time
 # Define convertion function (python type): xml schema type
 TYPE_MAP = {str:'string',unicode:'string',
             bool:'boolean', short:'short', byte:'byte',
-            int:'int', long:'long', integer:'integer', 
+            int:'int', long:'long', integer:'integer',
             float:'float', double:'double',
             Decimal:'decimal',
             datetime.datetime:'dateTime', datetime.date:'date',
